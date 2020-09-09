@@ -4,6 +4,7 @@ import Backend from './backend';
 
 // tslint:disable-next-line: no-namespace
 namespace System {
+
     export namespace Middleware {
         export function verifyPostBody(req: express.Request, res: express.Response, next: express.NextFunction) {
             console.log(`[middleware]method:${req.method}, path:${req.path}, body:${JSON.stringify(req.body)}`)
@@ -44,9 +45,6 @@ namespace System {
             }
         }
 
-        /**
-         * 回應包裝
-         */
         export function success<T>(data: T): SuccessStruct<T> {
             return {
                 success: data

@@ -59,12 +59,12 @@ namespace Backend{
         }
 
         export function error(res: express.Response, code: ErrorCode | number, msg: string, status:number): void {
-            console.log(`[Req]fail code:${code}, msg:${msg}`);
+            console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] fail code:${code}, msg:${msg}`);
             res.status(status).send(generateResponse(code, msg,{}));
         }
 
         export function success<T extends object>(res: express.Response, data: T): void {
-            console.log(`[Req]success data:${JSON.stringify(data)}`);
+            console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] success data:${JSON.stringify(data)}`);
             res.send(generateResponse(ErrorCode.Success, '',data));
         }
     }

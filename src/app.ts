@@ -3,23 +3,25 @@ import { Application } from 'express'
 import BodyParse from 'body-parser';
 import CookieParse from 'cookie-parser';
 import System from './modules/system';
-import { DefRouters } from './routes/defRouters';
-import mail from './routes/mail';
-import Redis, { RedisClient } from 'redis'
+import { Routers } from './routes/routers';
 import ServerSetup from './configs/serverSetup';
+import TedisInst from './instances/tedisInst';
+import MongoInst from './instances/mongoInst';
 
 export default class App{
 
   public app:Application;
-  public port:number;
-  public redisClient:RedisClient;
 
-  constructor(port:number){
+  constructor(){
+    this.initialInstances();
     this.app = express();
-    this.port = port;
-    this.runRedis();
     this.applyMiddlewares();
     this.addRoutes();
+  }
+
+  private async initialInstances(){
+     await TedisInst.initRedis();
+     await MongoInst.init();
   }
 
   private applyMiddlewares(){
@@ -30,22 +32,13 @@ export default class App{
   }
 
   private addRoutes() {
-    this.app.use('/mailing',mail);
-    DefRouters.forEach(route=> {
+    Routers.forEach(route=> {
       this.app.use(route.getRouter().bind(route));
     });
   }
 
-
-  private runRedis(){
-    this.redisClient = Redis.createClient(ServerSetup.redis.port);
-    this.redisClient.on('connect',()=>{
-      console.log(`⚡️[redis]: Server is running at ${ServerSetup.redis.host}:${ServerSetup.redis.port}`);
-    });
-  }
-
   public listen() {
-      this.app.listen(this.port, () => {
+      this.app.listen(ServerSetup.server.port, () => {
           console.log(`⚡️[server]: Server is running at http://localhost:${ServerSetup.server.port}`)
       });
   }

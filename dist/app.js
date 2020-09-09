@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,17 +16,22 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const system_1 = __importDefault(require("./modules/system"));
-const defRouters_1 = require("./routes/defRouters");
-const mail_1 = __importDefault(require("./routes/mail"));
-const redis_1 = __importDefault(require("redis"));
+const routers_1 = require("./routes/routers");
 const serverSetup_1 = __importDefault(require("./configs/serverSetup"));
+const tedisInst_1 = __importDefault(require("./instances/tedisInst"));
+const mongoInst_1 = __importDefault(require("./instances/mongoInst"));
 class App {
-    constructor(port) {
+    constructor() {
+        this.initialInstances();
         this.app = express_1.default();
-        this.port = port;
-        this.runRedis();
         this.applyMiddlewares();
         this.addRoutes();
+    }
+    initialInstances() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield tedisInst_1.default.initRedis();
+            yield mongoInst_1.default.init();
+        });
     }
     applyMiddlewares() {
         this.app.use(body_parser_1.default.json());
@@ -26,19 +40,12 @@ class App {
         this.app.use(system_1.default.Middleware.addCorsHeader);
     }
     addRoutes() {
-        this.app.use('/mailing', mail_1.default);
-        defRouters_1.DefRouters.forEach(route => {
+        routers_1.Routers.forEach(route => {
             this.app.use(route.getRouter().bind(route));
         });
     }
-    runRedis() {
-        this.redisClient = redis_1.default.createClient(serverSetup_1.default.redis.port);
-        this.redisClient.on('connect', () => {
-            console.log(`⚡️[redis]: Server is running at ${serverSetup_1.default.redis.host}:${serverSetup_1.default.redis.port}`);
-        });
-    }
     listen() {
-        this.app.listen(this.port, () => {
+        this.app.listen(serverSetup_1.default.server.port, () => {
             console.log(`⚡️[server]: Server is running at http://localhost:${serverSetup_1.default.server.port}`);
         });
     }

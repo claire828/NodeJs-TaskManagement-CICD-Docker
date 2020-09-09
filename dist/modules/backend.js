@@ -57,12 +57,12 @@ var Backend;
             };
         }
         function error(res, code, msg, status) {
-            console.log(`[Req]fail code:${code}, msg:${msg}`);
+            console.log(`[Req:${JSON.stringify((res === null || res === void 0 ? void 0 : res.req.route.path) || "")}] fail code:${code}, msg:${msg}`);
             res.status(status).send(generateResponse(code, msg, {}));
         }
         Response.error = error;
         function success(res, data) {
-            console.log(`[Req]success data:${JSON.stringify(data)}`);
+            console.log(`[Req:${JSON.stringify((res === null || res === void 0 ? void 0 : res.req.route.path) || "")}] success data:${JSON.stringify(data)}`);
             res.send(generateResponse(ErrorCode.Success, '', data));
         }
         Response.success = success;

@@ -1,1 +1,1 @@
-{"version":3,"file":"defRouters.js","sourceRoot":"","sources":["../../src/routes/defRouters.ts"],"names":[],"mappings":";;;;;;AAAA,4DAAoC;AAIvB,QAAA,UAAU,GAAiB;IACpC,IAAI,mBAAS,EAAE;CAClB,CAAC"}
+{"version":3,"file":"defRouters.js","sourceRoot":"","sources":["../../src/routes/defRouters.ts"],"names":[],"mappings":";;;;;;AAAA,4DAAoC;AACpC,4DAAmC;AAItB,QAAA,UAAU,GAAiB;IACpC,IAAI,mBAAS,EAAE;IACf,IAAI,mBAAS,EAAE;CAClB,CAAC"}

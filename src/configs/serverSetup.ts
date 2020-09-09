@@ -6,6 +6,13 @@ export interface ServerSetup {
     redis: {
         host: string,
         port: number,
+    },
+    mongo: {
+        host: string,
+        port: number,
+        acc: string,
+        pw: string,
+        authSource:string
     }
 }
 

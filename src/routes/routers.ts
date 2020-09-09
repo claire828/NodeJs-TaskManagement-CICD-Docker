@@ -1,7 +1,9 @@
 import TaskRoute from "./taskRoute";
+import AuthRoute from "./authRoute"
 import BasicRoute from "./basicRoute";
 
 
-export const DefRouters: BasicRoute[] = [
+export const Routers: BasicRoute[] = [
     new TaskRoute(),
+    new AuthRoute()
 ];

@@ -56,9 +56,6 @@ var System;
     })(Middleware = System.Middleware || (System.Middleware = {}));
     let Res;
     (function (Res) {
-        /**
-         * 回應包裝
-         */
         function success(data) {
             return {
                 success: data
