@@ -1,0 +1,9 @@
+{
+    "redis": {
+        "port": 9002,
+        "host": "http://localhost"
+    },
+    "server": {
+        "port": 9005
+    }
+}

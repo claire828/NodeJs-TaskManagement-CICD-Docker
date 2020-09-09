@@ -5,16 +5,19 @@ import CookieParse from 'cookie-parser';
 import System from './modules/system';
 import { DefRouters } from './routes/defRouters';
 import mail from './routes/mail';
-import TaskRoute from "./routes/taskRoute";
+import Redis, { RedisClient } from 'redis'
+import ServerSetup from './configs/serverSetup';
 
 export default class App{
 
   public app:Application;
   public port:number;
+  public redisClient:RedisClient;
 
   constructor(port:number){
     this.app = express();
     this.port = port;
+    this.runRedis();
     this.applyMiddlewares();
     this.addRoutes();
   }
@@ -28,16 +31,22 @@ export default class App{
 
   private addRoutes() {
     this.app.use('/mailing',mail);
-   // const taskRoute:TaskRoute = new TaskRoute();
-   // this.app.use(taskRoute.getRouter().bind(taskRoute));
     DefRouters.forEach(route=> {
       this.app.use(route.getRouter().bind(route));
     });
   }
 
+
+  private runRedis(){
+    this.redisClient = Redis.createClient(ServerSetup.redis.port);
+    this.redisClient.on('connect',()=>{
+      console.log(`⚡️[redis]: Server is running at ${ServerSetup.redis.host}:${ServerSetup.redis.port}`);
+    });
+  }
+
   public listen() {
       this.app.listen(this.port, () => {
-          console.log(`⚡️[server]: Server is running at  http://localhost:${this.port}`)
+          console.log(`⚡️[server]: Server is running at http://localhost:${ServerSetup.server.port}`)
       });
   }
 

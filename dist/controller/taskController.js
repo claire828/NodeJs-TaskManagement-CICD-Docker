@@ -39,10 +39,10 @@ class TaskController {
     }
     addTasks(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(`receive:[addTasks], ${JSON.stringify(req)}`);
+            console.log(`receive:[addTasks]`);
             // TODO HMAC解密
             try {
-                yield this.checkUserExist("");
+                // await this.checkUserExist("");
                 // TODO Mapping Req資料
                 /* const tasks:Task[] = JSON.parse(req.body.tasks);
                  for await(const task of tasks){
@@ -64,8 +64,9 @@ class TaskController {
     checkUserExist(account) {
         return __awaiter(this, void 0, void 0, function* () {
             // TODO 確認使用者存在否
+            const bExist = false;
             console.log(`Check user[${account}] exist or not?`);
-            if (false) {
+            if (true) {
                 yield this.createUser(account);
             }
             return new Promise((resolve, reject) => { resolve(); });

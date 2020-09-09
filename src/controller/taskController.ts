@@ -33,10 +33,10 @@ export default class TaskController{
 
 
     public async addTasks(req:express.Request, res:express.Response):Promise<void>{
-        console.log(`receive:[addTasks], ${JSON.stringify(req)}`);
+        console.log(`receive:[addTasks]`);
         // TODO HMAC解密
         try{
-            await this.checkUserExist("");
+            // await this.checkUserExist("");
             // TODO Mapping Req資料
            /* const tasks:Task[] = JSON.parse(req.body.tasks);
             for await(const task of tasks){
@@ -55,8 +55,9 @@ export default class TaskController{
 
     private async checkUserExist(account:string):Promise<void>{
         // TODO 確認使用者存在否
+        const bExist:boolean = false;
         console.log(`Check user[${account}] exist or not?`);
-        if(false){
+        if(true){
             await this.createUser(account);
         }
         return new Promise((resolve, reject) =>{ resolve()});
