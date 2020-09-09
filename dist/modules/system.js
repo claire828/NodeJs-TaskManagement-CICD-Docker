@@ -32,14 +32,14 @@ var System;
         function verifyPostBody(req, res, next) {
             console.log(`[middleware]method:${req.method}, path:${req.path}, body:${JSON.stringify(req.body)}`);
             if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-                backend_1.default.Response.error(res, backend_1.default.Response.ErrorCode.InsufficientParameters, "Empty POST");
-                return;
+                console.log("[middleware] post 沒過  return掉");
+                return backend_1.default.Response.error(res, backend_1.default.Response.ErrorCode.InsufficientParameters, 'Empty POST', 200);
             }
             next();
         }
         Middleware.verifyPostBody = verifyPostBody;
         function addCorsHeader(req, res, next) {
-            res.header("Access-Control-Allow-Origin", "*");
+            res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Headers', 'Content-Type,Accept');
             next();
         }
@@ -48,28 +48,33 @@ var System;
             return `Error Type:${backend_1.default.Response.ErrorCode}, msg:${msg}`;
         }
         Middleware.errorHandler = errorHandler;
+        function verifyAuthorize(req, res, next) {
+            // TODO HMAC解密實作
+            next();
+        }
+        Middleware.verifyAuthorize = verifyAuthorize;
     })(Middleware = System.Middleware || (System.Middleware = {}));
     let Res;
     (function (Res) {
         /**
          * 回應包裝
          */
-        function Success(data) {
+        function success(data) {
             return {
                 success: data
             };
         }
-        Res.Success = Success;
-        function Error(no, msg, data) {
+        Res.success = success;
+        function error(status, msg, data) {
             return {
                 error: {
-                    no,
+                    status,
                     msg,
                     data
                 }
             };
         }
-        Res.Error = Error;
+        Res.error = error;
     })(Res = System.Res || (System.Res = {}));
 })(System || (System = {}));
 exports.default = System;

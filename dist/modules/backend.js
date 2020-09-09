@@ -9,7 +9,7 @@ var Backend;
 (function (Backend) {
     let Req;
     (function (Req) {
-        Req.ParseParamType = {
+        Req.PARSEPARAMTYPE = {
             Any: () => true,
             String: (x) => underscore_1.default.isString(x),
             Number: (x) => underscore_1.default.isNumber(x),
@@ -28,31 +28,6 @@ var Backend;
             return mapping;
         }
         Req.parseParam = parseParam;
-        /* export function parseParam2(req:express.Request, paramObj:Record< any,(x:string|number|object|any)=>boolean>):Record<string,any> | boolean{
-             const mapping: Record<string,any> = {};
-             Object.keys(paramObj).forEach((key,value)=>{
-                 console.log(key);
-                // if(!value) return false;
-                // mapping[key] = req.body[key];
-                 mapping[key] = "claire";
-             });
-             return mapping;
-         }
- 
-         export function test<T extends object>(req:express.Request, inter:T):boolean| T{
-             const mapping = inter;
-             console.log(`inter:${JSON.stringify(inter)}`);
-             console.log(`mapping:${JSON.stringify(mapping)}`);
-             Object.keys(inter).forEach((key,value)=>{
-                 const hey = {[key]:"claire"};
-                 // if(!value) return false;
-                 // mapping = Object.assign({key:req.body[key]},mapping);
-                 const hello = Object.assign(hey,mapping);
-                 console.log(`hello:${JSON.stringify(hello)}`);
-                 return hello;
-             });
-             return mapping;
-         }*/
     })(Req = Backend.Req || (Backend.Req = {}));
     let Response;
     (function (Response) {
@@ -81,7 +56,7 @@ var Backend;
                 Data
             };
         }
-        function error(res, code, msg, status = 200) {
+        function error(res, code, msg, status) {
             console.log(`[Req]fail code:${code}, msg:${msg}`);
             res.status(status).send(generateResponse(code, msg, {}));
         }

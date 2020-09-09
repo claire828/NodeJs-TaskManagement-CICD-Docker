@@ -1,19 +1,18 @@
 
-import express, { json } from 'express';
+import express from 'express';
 import _, { map, object } from 'underscore';
 
 // tslint:disable-next-line: no-namespace
 namespace Backend{
 
     export namespace Req{
-        export const ParseParamType = {
+        export const PARSEPARAMTYPE = {
             Any: () => true,
             String: (x: string) => _.isString(x),
             Number: (x: string) => _.isNumber(x),
             // tslint:disable-next-line: ban-types
             Object: (x: Object) => _.isObject(x),
         }
-
 
         export function parseParam(req:express.Request, paramObj:Record< any, (x:string|number|object|any)=>boolean>):Map<string,any> | boolean{
             const mapping: Map<string,any> = new Map();
@@ -44,14 +43,14 @@ namespace Backend{
             /** Verify error */
             Verify = 13,
         }
-        export interface IResponse {
+        export interface ResStruct {
             ErrorCode: ErrorCode;
             Message: string;
             Data: object;
         }
 
         // tslint:disable-next-line: no-shadowed-variable
-        function generateResponse(ErrorCode:ErrorCode, Message:string,  Data: object):IResponse{
+        function generateResponse(ErrorCode:ErrorCode, Message:string, Data: object):ResStruct{
             return {
                 ErrorCode,
                 Message,
