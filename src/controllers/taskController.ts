@@ -2,6 +2,10 @@ import express, { json } from 'express';
 import Backend from '../modules/backend';
 import TedisInst from '../instances/tedisInst';
 import Auth from '../modules/auth';
+import Common from '../modules/common';
+import TaskConfig from '../configs/TaskConfig';
+import MongoInst from '../instances/mongoInst';
+import MongoConfig from '../configs/mongoConfig';
 
 export enum TaskStatus{
     Draf,
@@ -10,9 +14,7 @@ export enum TaskStatus{
 }
 
 export default class TaskController{
-    private readonly ExpiredHours = 24;
-
-    private get stTime():number{ return Date.now().exFloorTimeToSec();}
+    private readonly ExpiredSec = 24*60*60;
 
     private unknowErrorHandler(res:express.Response, err:any, msg?:string){
         console.log( err instanceof Error ? err.stack : err);
@@ -26,15 +28,23 @@ export default class TaskController{
      */
     public async getTasks(req:express.Request, res:express.Response):Promise<void>{
         try{
-            // Step1 取出帳號
             // Step2 (skip）先看CacheServer有沒有資料
             // Step3 (skip)CacheServer沒有資料，就抓MongoDB的回存 （skip 4)
-            // Step4 判斷MongoDB中的Draf資料是否過期 -> 比對timestamp -> 如果過期，刪掉redis的資料
-            // Step5 Module取得資料，包裝回Json傳回結束
-            // const email:string = req.body.email;
-            // const task = await TedisInst.get().get(email);
-            // Backend.Response.success(res,JSON.parse(task?.toString() || ""));
-            Backend.Response.success(res,{});
+            const account:string = req.body.account;
+            const target = await MongoInst.RoloTasks.findOne({account});
+            for (const tId of target.drafs){
+                const task = await TedisInst.get().get(tId);
+                if(task ){
+                    const valueJson = JSON.parse(task.toString()) as TaskConfig.Basic;
+                    target.tasks.push({
+                        title:valueJson.title,
+                        content:valueJson.content,
+                        tId,
+                        status:TaskConfig.Status.Draf
+                    });
+                }
+            }
+            Backend.Response.success(res,target.tasks);
         }catch(err){
             return this.unknowErrorHandler(res,err);
         }
@@ -47,16 +57,15 @@ export default class TaskController{
      */
     public async addTask(req:express.Request, res:express.Response):Promise<void>{
         try{
-            // Step1 取出帳號
-            // Step2 產出taskID (email+timestamp)
-            // Step3 將Task放進去Draf DB + 24HExpiredTime
-            // Step4 將taskID存進去MongoDB - tasks collections - draf Field (with 24HExpiredTime)
-            const email:string = req.body.email;
-            const tasks = {
-                title: req.body.name,
-                st: this.stTime
-            };
-            await TedisInst.get().setex(email, this.ExpiredHours.exHoursInSec(), JSON.stringify(tasks));
+            // TODO 目前是假資料，補上正式的
+            const account:string = req.body.account;
+            const taskID:string = this.generateTaskID(account)
+            const tasks:TaskConfig.Basic = {
+                title:"",
+                content:"",
+            }
+            await TedisInst.get().setex(taskID, this.ExpiredSec , JSON.stringify(tasks));
+            await MongoInst.RoloTasks.updateOne({account},{$addToSet:{drafs:taskID}},{upsert:true});
             return Backend.Response.success(res,{});
         }catch(err){
              // TODO 資料要補寫到System的Log中
@@ -72,17 +81,32 @@ export default class TaskController{
      */
     public async conformTask(req:express.Request, res:express.Response):Promise<void>{
         try{
-            // Step1 取出帳號
-            // Step2 從redis取出資料
-            // Step3 將資料的expire取消 （看要不要刪除）
-            // Step4 存到Mongo中
-            // Step5 更新到Cache Server (刪除cache)
+            const account:string = req.body.account;
+            const tId:string = req.body.tid;
+            const value = await TedisInst.get().get(tId);
+            await TedisInst.get().del(tId);
+            const valueJson = JSON.parse(value.toString()) as TaskConfig.Basic;
+            const task:TaskConfig.Task = {
+                title: valueJson.title,
+                content: valueJson.content,
+                tId,
+                status:TaskConfig.Status.Conform,
+                t:{
+                    st:Common.NowInSec().toString()
+                }
+            }
+            await MongoInst.RoloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
+            // TODO Step5 更新到Cache Server (刪除cache)
             return Backend.Response.success(res,{});
         }catch(err){
             return this.unknowErrorHandler(res,err);
         }
     }
 
+
+    private generateTaskID(account:string):string{
+        return `${account}${Common.NowInSec().toString()}`
+    }
 
 }
 

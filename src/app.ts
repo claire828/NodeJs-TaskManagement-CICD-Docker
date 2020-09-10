@@ -35,6 +35,7 @@ export default class App{
     this.app.use(CookieParse());
     this.app.use(Middleware.log);
     this.app.use(Middleware.addCorsHeader);
+    this.app.use(Middleware.verifyPostBody);
   }
 
   private addRoutes() {

@@ -10,4 +10,4 @@ var TaskConfig;
     })(Status = TaskConfig.Status || (TaskConfig.Status = {}));
 })(TaskConfig || (TaskConfig = {}));
 exports.default = TaskConfig;
-//# sourceMappingURL=taskConfig.js.map
+//# sourceMappingURL=TaskConfig.js.map

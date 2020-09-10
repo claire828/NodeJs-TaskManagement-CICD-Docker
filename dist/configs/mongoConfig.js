@@ -12,12 +12,6 @@ var MongoConfig;
         Collections["Tasks"] = "tasks";
         Collections["Users"] = "users";
     })(Collections = MongoConfig.Collections || (MongoConfig.Collections = {}));
-    function Scheme(a) {
-        return {
-            data: a,
-        };
-    }
-    MongoConfig.Scheme = Scheme;
 })(MongoConfig || (MongoConfig = {}));
 exports.default = MongoConfig;
 //# sourceMappingURL=mongoConfig.js.map

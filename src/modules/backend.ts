@@ -10,8 +10,7 @@ namespace Backend{
             Any: () => true,
             String: (x: string) => _.isString(x),
             Number: (x: string) => _.isNumber(x),
-            // tslint:disable-next-line: ban-types
-            Object: (x: Object) => _.isObject(x),
+            Object: (x: object) => _.isObject(x),
         }
 
         export function parseParam(req:express.Request, paramObj:Record< any, (x:string|number|object|any)=>boolean>):Map<string,any> | boolean{
@@ -41,7 +40,6 @@ namespace Backend{
             data?: object;
         }
 
-        // tslint:disable-next-line: no-shadowed-variable
         function generateResponse(status:Status, message:string, data?: object):ServerResponceContent{
             return {
                 status,
@@ -51,13 +49,13 @@ namespace Backend{
         }
 
         export function error(res: express.Response, code: Status | number, msg: string, status:number): void {
-            console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] fail code:${code}, msg:${msg}`);
+            console.log(`[Fail code:${code}, msg:${msg}`);
             const responseInfo:ServerResponceContent = generateResponse(code, msg)
             res.status(status).send(responseInfo).end();
         }
 
         export function success<T extends object>(res: express.Response, data: T): void {
-            console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] success data:${JSON.stringify(data)}`);
+            console.log(`[Success data:${JSON.stringify(data)}`);
             res.send(generateResponse(Status.Success, '',data));
         }
 

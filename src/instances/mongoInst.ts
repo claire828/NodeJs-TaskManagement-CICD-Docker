@@ -1,6 +1,7 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
 import ServerSetup from '../configs/serverSetup';
 import MongoConfig from '../configs/mongoConfig'
+import { Collection } from "underscore";
 
 class MongoInst {
     private static instance: MongoClient = undefined;
@@ -16,20 +17,26 @@ class MongoInst {
                     password:ServerSetup.mongo.pw
                 }
             }
-            this.instance = await new MongoClient(`mongodb://${ServerSetup.mongo.host}:${ServerSetup.mongo.port}`, options).connect()
+            MongoInst.instance = await new MongoClient(`mongodb://${ServerSetup.mongo.host}:${ServerSetup.mongo.port}`, options).connect()
             console.log(`⚡️[mongo]: Server is running at ${ServerSetup.mongo.host}:${ServerSetup.mongo.port}`);
         } catch (e) {
             console.log('Create Mongo Error : ' + (e instanceof Error ? e.stack : e));
         }
     }
 
-    public static getDb(name: MongoConfig.Dbs) {
-        return this.instance.db(name);
+    private static get RoloDB(){
+        return MongoInst.instance.db(MongoConfig.Dbs.Rolo);
     }
 
-    public static get(): MongoClient {
-        return this.instance;
+    public static get RoloUsers(){
+        return MongoInst.RoloDB.collection<MongoConfig.Scheme.UserCollect>(MongoConfig.Collections.Users);
     }
+
+    public static get RoloTasks(){
+        return MongoInst.RoloDB.collection<MongoConfig.Scheme.TaskCollect>(MongoConfig.Collections.Tasks);
+    }
+
+
 }
 
 export default MongoInst;

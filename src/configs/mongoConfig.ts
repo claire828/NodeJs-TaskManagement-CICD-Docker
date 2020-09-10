@@ -1,3 +1,4 @@
+import TaskConfig from "./TaskConfig";
 
 
 // tslint:disable-next-line: no-namespace
@@ -13,12 +14,24 @@ namespace MongoConfig {
         Users = 'users'
     }
 
+    export namespace Scheme{
 
-    export function Scheme<T>(a:T){
-        return {
-            data:a,
-        }
+        export type UserCollect = {
+            // TODO 這個ID可以改成autoIncrease
+            // uId:string,
+            account:string,
+            pw:string,
+            joinT:string
+       }
+
+       export type TaskCollect = {
+            account:string,
+            drafs:string[],
+            tasks:TaskConfig.Task[],
+       }
     }
+
+
 
 
 

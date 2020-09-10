@@ -1,8 +1,12 @@
 import express, { json } from 'express';
 import Backend from '../modules/backend';
 import TedisInst from '../instances/tedisInst';
+import MongoInst from '../instances/mongoInst';
+import MongoConfig from '../configs/mongoConfig';
+import Auth from '../modules/auth';
+import Common from '../modules/common';
 
-
+// TODO Request的Account還沒加入 & 密碼也要加上
 export default class AuthController{
 
     private responseError(res:express.Response, err:any, msg?:string){
@@ -13,7 +17,14 @@ export default class AuthController{
 
     public async register(req:express.Request, res:express.Response):Promise<void>{
         try{
-            Backend.Response.success(res,{});
+            const user:MongoConfig.Scheme.UserCollect = {
+                account: req.body.account,
+                pw: "",
+                joinT: Common.NowInSec().toString()
+            }
+            await MongoInst.RoloUsers.insertOne(user);
+            const token = Auth.generateToken(user.account);
+            Backend.Response.success(res,token);
         }catch(err){
             return this.responseError(res,err);
         }
@@ -21,7 +32,8 @@ export default class AuthController{
 
     public async logIn(req:express.Request, res:express.Response):Promise<void>{
         try{
-            Backend.Response.success(res,{});
+            const token = Auth.generateToken(req.body.account);
+            Backend.Response.success(res,token);
         }catch(err){
             return this.responseError(res,err);
         }

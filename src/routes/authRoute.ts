@@ -14,8 +14,17 @@ export default class AuthRoute extends BasicToute{
     }
 
     protected setRoutes():void{
-        this.router.post('/auth/register', Middleware.verifyPostBody, Middleware.verifyOnlyAuthorize, this.authController.register.bind(this.authController));
-        this.router.post('/auth/login', Middleware.verifyPostBody, Middleware.verifyAuthAndMember, this.authController.logIn.bind(this.authController));
+        this.router.post('/auth/register',
+            Middleware.verifyToken,
+            Middleware.verifyEmptyMember,
+            this.authController.register.bind(this.authController)
+        );
+
+        this.router.post('/auth/login',
+            Middleware.verifyToken,
+            Middleware.verifyAuthEntre,
+            this.authController.logIn.bind(this.authController)
+        );
     }
 
 

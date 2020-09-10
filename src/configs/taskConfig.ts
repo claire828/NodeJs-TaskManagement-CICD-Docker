@@ -8,14 +8,13 @@ namespace TaskConfig{
     export type Basic = {
         title:string,
         content:string,
-        status:Status,
     }
 
-    export type Task<K> = Basic & {
-        asign:string,
-        id:string,
-        t:Time,
-        data?:K
+    export type Task = Basic & {
+        tId:string,
+        status:Status,
+        t?:Time,
+        asign?:string,
     }
     export type Time = {
         st:string | number,

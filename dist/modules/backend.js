@@ -13,7 +13,6 @@ var Backend;
             Any: () => true,
             String: (x) => underscore_1.default.isString(x),
             Number: (x) => underscore_1.default.isNumber(x),
-            // tslint:disable-next-line: ban-types
             Object: (x) => underscore_1.default.isObject(x),
         };
         function parseParam(req, paramObj) {
@@ -40,7 +39,6 @@ var Backend;
             Status[Status["Token"] = 12] = "Token";
             Status[Status["Verify"] = 13] = "Verify";
         })(Status = Response.Status || (Response.Status = {}));
-        // tslint:disable-next-line: no-shadowed-variable
         function generateResponse(status, message, data) {
             return {
                 status,
@@ -49,13 +47,13 @@ var Backend;
             };
         }
         function error(res, code, msg, status) {
-            console.log(`[Req:${JSON.stringify((res === null || res === void 0 ? void 0 : res.req.route.path) || "")}] fail code:${code}, msg:${msg}`);
+            console.log(`[Fail code:${code}, msg:${msg}`);
             const responseInfo = generateResponse(code, msg);
             res.status(status).send(responseInfo).end();
         }
         Response.error = error;
         function success(res, data) {
-            console.log(`[Req:${JSON.stringify((res === null || res === void 0 ? void 0 : res.req.route.path) || "")}] success data:${JSON.stringify(data)}`);
+            console.log(`[Success data:${JSON.stringify(data)}`);
             res.send(generateResponse(Status.Success, '', data));
         }
         Response.success = success;

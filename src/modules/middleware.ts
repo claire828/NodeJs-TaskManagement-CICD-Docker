@@ -7,13 +7,13 @@ import Auth from './auth';
 namespace Middleware {
 
     export function log(req: express.Request, res: express.Response, next: express.NextFunction){
-        console.log(`【${req.method}】path:【${req.path}】, \n body:【${JSON.stringify(req.body)}】`);
+        console.log(`【${req.method}】path:【${req?.path}】, \n body:【${JSON.stringify(req?.body) || "{}"}】`);
         next();
     }
 
     export function verifyPostBody(req: express.Request, res: express.Response, next: express.NextFunction) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            return Backend.Response.error(res, Backend.Response.Status.InsufficientParameters, 'Empty POST',200);
+            return Backend.Response.error(res, Backend.Response.Status.InsufficientParameters, 'Empty POST',201);
         }
         next();
     }
@@ -32,24 +32,35 @@ namespace Middleware {
         return res.status(403).end();
     }
 
-    /*
-     * 驗證（不理會帳號是否存在，提供給註冊的要求使用）
-     */
-    export function verifyOnlyAuthorize(req:express.Request, res:express.Response, next:express.NextFunction){
-        const bSuccess = Auth.VerifyToken(req);
-        if(!bSuccess) return Backend.Response.verifyError(res);
-        next();
+
+     export async function verifyToken(req:express.Request, res:express.Response, next:express.NextFunction){
+        try{
+            const bLegle = await Auth.isTokenLegal(req.body.token);
+            if(!bLegle) return Backend.Response.verifyError(res);
+            next();
+        }catch(err){
+            return this.errorHandler(Backend.Response.Status.FailureExecuting,400);
+        }
     }
 
-    /**
-     * 驗證＋帳號合法性
-     */
-    export function verifyAuthAndMember(req:express.Request, res:express.Response, next:express.NextFunction){
-        const user:string ="";
-        const bAuth = Auth.VerifyToken(req);
-        const bUser = Auth.IsUserExist(user);
-        if(!bUser || !bAuth) return Backend.Response.verifyError(res);
-        next();
+    export async function verifyEmptyMember(req:express.Request, res:express.Response, next:express.NextFunction){
+        try{
+            const bLegle = await Auth.isRegistLegal(req.body.account);
+            if(!bLegle) return Backend.Response.verifyError(res);
+            next();
+        }catch(err){
+            return this.errorHandler(Backend.Response.Status.FailureExecuting,400);
+        }
+    }
+
+    export async function verifyAuthEntre(req:express.Request, res:express.Response, next:express.NextFunction){
+        try{
+            const bLegle = await Auth.isUserExist(req.body.account);
+            if(!bLegle) return Backend.Response.verifyError(res);
+            next();
+        }catch(err){
+            return this.errorHandler(Backend.Response.Status.FailureExecuting,400);
+        }
     }
 }
 

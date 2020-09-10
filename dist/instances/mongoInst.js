@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
 const serverSetup_1 = __importDefault(require("../configs/serverSetup"));
+const mongoConfig_1 = __importDefault(require("../configs/mongoConfig"));
 class MongoInst {
     static init() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -27,7 +28,7 @@ class MongoInst {
                         password: serverSetup_1.default.mongo.pw
                     }
                 };
-                this.instance = yield new mongodb_1.MongoClient(`mongodb://${serverSetup_1.default.mongo.host}:${serverSetup_1.default.mongo.port}`, options).connect();
+                MongoInst.instance = yield new mongodb_1.MongoClient(`mongodb://${serverSetup_1.default.mongo.host}:${serverSetup_1.default.mongo.port}`, options).connect();
                 console.log(`⚡️[mongo]: Server is running at ${serverSetup_1.default.mongo.host}:${serverSetup_1.default.mongo.port}`);
             }
             catch (e) {
@@ -35,11 +36,14 @@ class MongoInst {
             }
         });
     }
-    static getDb(name) {
-        return this.instance.db(name);
+    static get RoloDB() {
+        return MongoInst.instance.db(mongoConfig_1.default.Dbs.Rolo);
     }
-    static get() {
-        return this.instance;
+    static get RoloUsers() {
+        return MongoInst.RoloDB.collection(mongoConfig_1.default.Collections.Users);
+    }
+    static get RoloTasks() {
+        return MongoInst.RoloDB.collection(mongoConfig_1.default.Collections.Tasks);
     }
 }
 MongoInst.instance = undefined;

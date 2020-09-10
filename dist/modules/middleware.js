@@ -18,6 +18,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -29,13 +38,13 @@ const auth_1 = __importDefault(require("./auth"));
 var Middleware;
 (function (Middleware) {
     function log(req, res, next) {
-        console.log(`【${req.method}】path:【${req.path}】, \n body:【${JSON.stringify(req.body)}】`);
+        console.log(`【${req.method}】path:【${req === null || req === void 0 ? void 0 : req.path}】, \n body:【${JSON.stringify(req === null || req === void 0 ? void 0 : req.body) || "{}"}】`);
         next();
     }
     Middleware.log = log;
     function verifyPostBody(req, res, next) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, 'Empty POST', 200);
+            return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, 'Empty POST', 201);
         }
         next();
     }
@@ -54,28 +63,48 @@ var Middleware;
         return res.status(403).end();
     }
     Middleware.unknownRoute = unknownRoute;
-    /*
-     * 驗證（不理會帳號是否存在，提供給註冊的要求使用）
-     */
-    function verifyOnlyAuthorize(req, res, next) {
-        const bSuccess = auth_1.default.VerifyToken(req);
-        if (!bSuccess)
-            return backend_1.default.Response.verifyError(res);
-        next();
+    function verifyToken(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const bLegle = yield auth_1.default.isTokenLegal(req.body.token);
+                if (!bLegle)
+                    return backend_1.default.Response.verifyError(res);
+                next();
+            }
+            catch (err) {
+                return this.errorHandler(backend_1.default.Response.Status.FailureExecuting, 400);
+            }
+        });
     }
-    Middleware.verifyOnlyAuthorize = verifyOnlyAuthorize;
-    /**
-     * 驗證＋帳號合法性
-     */
-    function verifyAuthAndMember(req, res, next) {
-        const user = "";
-        const bAuth = auth_1.default.VerifyToken(req);
-        const bUser = auth_1.default.IsUserExist(user);
-        if (!bUser || !bAuth)
-            return backend_1.default.Response.verifyError(res);
-        next();
+    Middleware.verifyToken = verifyToken;
+    function verifyEmptyMember(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const bLegle = yield auth_1.default.isRegistLegal(req.body.account);
+                if (!bLegle)
+                    return backend_1.default.Response.verifyError(res);
+                next();
+            }
+            catch (err) {
+                return this.errorHandler(backend_1.default.Response.Status.FailureExecuting, 400);
+            }
+        });
     }
-    Middleware.verifyAuthAndMember = verifyAuthAndMember;
+    Middleware.verifyEmptyMember = verifyEmptyMember;
+    function verifyAuthEntre(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const bLegle = yield auth_1.default.isUserExist(req.body.account);
+                if (!bLegle)
+                    return backend_1.default.Response.verifyError(res);
+                next();
+            }
+            catch (err) {
+                return this.errorHandler(backend_1.default.Response.Status.FailureExecuting, 400);
+            }
+        });
+    }
+    Middleware.verifyAuthEntre = verifyAuthEntre;
 })(Middleware || (Middleware = {}));
 exports.default = Middleware;
 //# sourceMappingURL=middleware.js.map

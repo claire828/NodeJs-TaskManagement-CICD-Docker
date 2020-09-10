@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TaskStatus = void 0;
 const backend_1 = __importDefault(require("../modules/backend"));
 const tedisInst_1 = __importDefault(require("../instances/tedisInst"));
+const common_1 = __importDefault(require("../modules/common"));
+const TaskConfig_1 = __importDefault(require("../configs/TaskConfig"));
+const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 var TaskStatus;
 (function (TaskStatus) {
     TaskStatus[TaskStatus["Draf"] = 0] = "Draf";
@@ -23,9 +26,8 @@ var TaskStatus;
 })(TaskStatus = exports.TaskStatus || (exports.TaskStatus = {}));
 class TaskController {
     constructor() {
-        this.ExpiredHours = 24;
+        this.ExpiredSec = 24 * 60 * 60;
     }
-    get stTime() { return Date.now().exFloorTimeToSec(); }
     unknowErrorHandler(res, err, msg) {
         console.log(err instanceof Error ? err.stack : err);
         return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 401);
@@ -38,15 +40,23 @@ class TaskController {
     getTasks(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Step1 取出帳號
                 // Step2 (skip）先看CacheServer有沒有資料
                 // Step3 (skip)CacheServer沒有資料，就抓MongoDB的回存 （skip 4)
-                // Step4 判斷MongoDB中的Draf資料是否過期 -> 比對timestamp -> 如果過期，刪掉redis的資料
-                // Step5 Module取得資料，包裝回Json傳回結束
-                // const email:string = req.body.email;
-                // const task = await TedisInst.get().get(email);
-                // Backend.Response.success(res,JSON.parse(task?.toString() || ""));
-                backend_1.default.Response.success(res, {});
+                const account = req.body.account;
+                const target = yield mongoInst_1.default.RoloTasks.findOne({ account });
+                for (const tId of target.drafs) {
+                    const task = yield tedisInst_1.default.get().get(tId);
+                    if (task) {
+                        const valueJson = JSON.parse(task.toString());
+                        target.tasks.push({
+                            title: valueJson.title,
+                            content: valueJson.content,
+                            tId,
+                            status: TaskConfig_1.default.Status.Draf
+                        });
+                    }
+                }
+                backend_1.default.Response.success(res, target.tasks);
             }
             catch (err) {
                 return this.unknowErrorHandler(res, err);
@@ -61,16 +71,15 @@ class TaskController {
     addTask(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Step1 取出帳號
-                // Step2 產出taskID (email+timestamp)
-                // Step3 將Task放進去Draf DB + 24HExpiredTime
-                // Step4 將taskID存進去MongoDB - tasks collections - draf Field (with 24HExpiredTime)
-                const email = req.body.email;
+                // TODO 目前是假資料，補上正式的
+                const account = req.body.account;
+                const taskID = this.generateTaskID(account);
                 const tasks = {
-                    title: req.body.name,
-                    st: this.stTime
+                    title: "",
+                    content: "",
                 };
-                yield tedisInst_1.default.get().setex(email, this.ExpiredHours.exHoursInSec(), JSON.stringify(tasks));
+                yield tedisInst_1.default.get().setex(taskID, this.ExpiredSec, JSON.stringify(tasks));
+                yield mongoInst_1.default.RoloTasks.updateOne({ account }, { $addToSet: { drafs: taskID } }, { upsert: true });
                 return backend_1.default.Response.success(res, {});
             }
             catch (err) {
@@ -87,17 +96,31 @@ class TaskController {
     conformTask(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Step1 取出帳號
-                // Step2 從redis取出資料
-                // Step3 將資料的expire取消 （看要不要刪除）
-                // Step4 存到Mongo中
-                // Step5 更新到Cache Server (刪除cache)
+                const account = req.body.account;
+                const tId = req.body.tid;
+                const value = yield tedisInst_1.default.get().get(tId);
+                yield tedisInst_1.default.get().del(tId);
+                const valueJson = JSON.parse(value.toString());
+                const task = {
+                    title: valueJson.title,
+                    content: valueJson.content,
+                    tId,
+                    status: TaskConfig_1.default.Status.Conform,
+                    t: {
+                        st: common_1.default.NowInSec().toString()
+                    }
+                };
+                yield mongoInst_1.default.RoloTasks.updateOne({ account }, { $addToSet: { tasks: task }, $pull: { drafs: tId } }, { upsert: true });
+                // TODO Step5 更新到Cache Server (刪除cache)
                 return backend_1.default.Response.success(res, {});
             }
             catch (err) {
                 return this.unknowErrorHandler(res, err);
             }
         });
+    }
+    generateTaskID(account) {
+        return `${account}${common_1.default.NowInSec().toString()}`;
     }
 }
 exports.default = TaskController;

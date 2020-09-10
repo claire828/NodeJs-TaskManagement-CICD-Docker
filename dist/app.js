@@ -45,6 +45,7 @@ class App {
         this.app.use(cookie_parser_1.default());
         this.app.use(middleware_1.default.log);
         this.app.use(middleware_1.default.addCorsHeader);
+        this.app.use(middleware_1.default.verifyPostBody);
     }
     addRoutes() {
         routers_1.Routers.forEach(route => {
