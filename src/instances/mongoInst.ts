@@ -17,23 +17,23 @@ class MongoInst {
                     password:ServerSetup.mongo.pw
                 }
             }
-            MongoInst.instance = await new MongoClient(`mongodb://${ServerSetup.mongo.host}:${ServerSetup.mongo.port}`, options).connect()
+            MongoInst.instance = await new MongoClient(`mongodb://${ServerSetup.mongo.host}:${ServerSetup.mongo.port}`, options).connect();
             console.log(`⚡️[mongo]: Server is running at ${ServerSetup.mongo.host}:${ServerSetup.mongo.port}`);
         } catch (e) {
             console.log('Create Mongo Error : ' + (e instanceof Error ? e.stack : e));
         }
     }
 
-    private static get RoloDB(){
+    private static get roloDB(){
         return MongoInst.instance.db(MongoConfig.Dbs.Rolo);
     }
 
-    public static get RoloUsers(){
-        return MongoInst.RoloDB.collection<MongoConfig.Scheme.UserCollect>(MongoConfig.Collections.Users);
+    public static get roloUsers(){
+        return MongoInst.roloDB.collection<MongoConfig.Scheme.UserCollect>(MongoConfig.Collections.Users);
     }
 
-    public static get RoloTasks(){
-        return MongoInst.RoloDB.collection<MongoConfig.Scheme.TaskCollect>(MongoConfig.Collections.Tasks);
+    public static get roloTasks(){
+        return MongoInst.roloDB.collection<MongoConfig.Scheme.TaskCollect>(MongoConfig.Collections.Tasks);
     }
 
 

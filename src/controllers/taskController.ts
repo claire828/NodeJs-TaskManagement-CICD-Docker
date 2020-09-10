@@ -2,10 +2,11 @@ import express, { json } from 'express';
 import Backend from '../modules/backend';
 import TedisInst from '../instances/tedisInst';
 import Auth from '../modules/auth';
-import Common from '../modules/common';
 import TaskConfig from '../configs/TaskConfig';
 import MongoInst from '../instances/mongoInst';
-import MongoConfig from '../configs/mongoConfig';
+import '../extensions/numberExtension';
+import '../extensions/dateExtension';
+import '../extensions/arrayExtension';
 
 export enum TaskStatus{
     Draf,
@@ -14,7 +15,7 @@ export enum TaskStatus{
 }
 
 export default class TaskController{
-    private readonly ExpiredSec = 24*60*60;
+    private readonly ExpiredHours = 24;
 
     private unknowErrorHandler(res:express.Response, err:any, msg?:string){
         console.log( err instanceof Error ? err.stack : err);
@@ -31,7 +32,7 @@ export default class TaskController{
             // Step2 (skip）先看CacheServer有沒有資料
             // Step3 (skip)CacheServer沒有資料，就抓MongoDB的回存 （skip 4)
             const account:string = req.body.account;
-            const target = await MongoInst.RoloTasks.findOne({account});
+            const target = await MongoInst.roloTasks.findOne({account});
             for (const tId of target.drafs){
                 const task = await TedisInst.get().get(tId);
                 if(task ){
@@ -64,8 +65,8 @@ export default class TaskController{
                 title:"",
                 content:"",
             }
-            await TedisInst.get().setex(taskID, this.ExpiredSec , JSON.stringify(tasks));
-            await MongoInst.RoloTasks.updateOne({account},{$addToSet:{drafs:taskID}},{upsert:true});
+            await TedisInst.get().setex(taskID, this.ExpiredHours.exHoursInSec() , JSON.stringify(tasks));
+            await MongoInst.roloTasks.updateOne({account},{$addToSet:{drafs:taskID}},{upsert:true});
             return Backend.Response.success(res,{});
         }catch(err){
              // TODO 資料要補寫到System的Log中
@@ -92,10 +93,10 @@ export default class TaskController{
                 tId,
                 status:TaskConfig.Status.Conform,
                 t:{
-                    st:Common.NowInSec().toString()
+                    st:Date.now().exFloorTimeToSec().toString()
                 }
             }
-            await MongoInst.RoloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
+            await MongoInst.roloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
             // TODO Step5 更新到Cache Server (刪除cache)
             return Backend.Response.success(res,{});
         }catch(err){
@@ -105,7 +106,7 @@ export default class TaskController{
 
 
     private generateTaskID(account:string):string{
-        return `${account}${Common.NowInSec().toString()}`
+        return `${account}${Date.now().exFloorTimeToSec()}`
     }
 
 }

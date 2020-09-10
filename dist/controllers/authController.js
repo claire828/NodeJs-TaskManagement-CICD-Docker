@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const backend_1 = __importDefault(require("../modules/backend"));
 const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 const auth_1 = __importDefault(require("../modules/auth"));
-const common_1 = __importDefault(require("../modules/common"));
 // TODO Request的Account還沒加入 & 密碼也要加上
 class AuthController {
     responseError(res, err, msg) {
@@ -28,9 +27,9 @@ class AuthController {
                 const user = {
                     account: req.body.account,
                     pw: "",
-                    joinT: common_1.default.NowInSec().toString()
+                    joinT: Date.now().exFloorTimeToSec().toString()
                 };
-                yield mongoInst_1.default.RoloUsers.insertOne(user);
+                yield mongoInst_1.default.roloUsers.insertOne(user);
                 const token = auth_1.default.generateToken(user.account);
                 backend_1.default.Response.success(res, token);
             }

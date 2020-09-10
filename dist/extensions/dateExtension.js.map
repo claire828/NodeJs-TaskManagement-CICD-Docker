@@ -1,0 +1,1 @@
+{"version":3,"file":"dateExtension.js","sourceRoot":"","sources":["../../src/extensions/dateExtension.ts"],"names":[],"mappings":"AAEA,iDAAiD;AACjD,IAAI,CAAC,SAAS,CAAC,KAAK,IAAI,MAAM,CAAC,cAAc,CAAC,IAAI,CAAC,SAAS,EAAE,OAAO,EAAE;IACnE,UAAU,EAAE,KAAK;IACjB,KAAK;QACD,OAAO,IAAI,CAAC,KAAK,CAAC,IAAI,CAAC,GAAG,EAAE,GAAG,IAAI,CAAC,CAAC;IACzC,CAAC;CACJ,CAAC,CAAA"}

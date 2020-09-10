@@ -36,14 +36,14 @@ class MongoInst {
             }
         });
     }
-    static get RoloDB() {
+    static get roloDB() {
         return MongoInst.instance.db(mongoConfig_1.default.Dbs.Rolo);
     }
-    static get RoloUsers() {
-        return MongoInst.RoloDB.collection(mongoConfig_1.default.Collections.Users);
+    static get roloUsers() {
+        return MongoInst.roloDB.collection(mongoConfig_1.default.Collections.Users);
     }
-    static get RoloTasks() {
-        return MongoInst.RoloDB.collection(mongoConfig_1.default.Collections.Tasks);
+    static get roloTasks() {
+        return MongoInst.roloDB.collection(mongoConfig_1.default.Collections.Tasks);
     }
 }
 MongoInst.instance = undefined;

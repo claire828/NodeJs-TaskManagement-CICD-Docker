@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const crypto_1 = __importDefault(require("crypto"));
 const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 // tslint:disable-next-line: no-namespace
 var Auth;
@@ -19,24 +20,23 @@ var Auth;
     function isTokenLegal(token) {
         return __awaiter(this, void 0, void 0, function* () {
             // TODO HMAC解密實作
-            /*const secret = 'abcdefg';
-            const hash = crypto.createHmac('sha256', secret)
-                            .update('I love cupcakes')
-                            .digest('hex');
-            console.log(`驗證:${hash}`);*/
             return true;
         });
     }
     Auth.isTokenLegal = isTokenLegal;
     function generateToken(user) {
+        const secret = 'abcdefg';
+        const hash = crypto_1.default.createHmac('sha256', secret)
+            .update('I love cupcakes')
+            .digest('hex');
         return {
-            token: "sfjdslfjl"
+            hash
         };
     }
     Auth.generateToken = generateToken;
     function isUserExist(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield mongoInst_1.default.RoloUsers.findOne({ account });
+            const result = yield mongoInst_1.default.roloUsers.findOne({ account });
             return result;
         });
     }
@@ -47,12 +47,6 @@ var Auth;
         });
     }
     Auth.isRegistLegal = isRegistLegal;
-    function isAuthLegal(account) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield Auth.isUserExist(account);
-        });
-    }
-    Auth.isAuthLegal = isAuthLegal;
 })(Auth || (Auth = {}));
 exports.default = Auth;
 //# sourceMappingURL=auth.js.map

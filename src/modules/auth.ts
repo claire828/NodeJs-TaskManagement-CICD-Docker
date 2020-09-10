@@ -7,31 +7,26 @@ import MongoInst from '../instances/mongoInst';
 namespace Auth{
     export async function isTokenLegal(token:string):Promise<boolean>{
         // TODO HMAC解密實作
-        /*const secret = 'abcdefg';
-        const hash = crypto.createHmac('sha256', secret)
-                        .update('I love cupcakes')
-                        .digest('hex');
-        console.log(`驗證:${hash}`);*/
         return true;
     }
 
     export function generateToken(user:string){
+        const secret = 'abcdefg';
+        const hash = crypto.createHmac('sha256', secret)
+                        .update('I love cupcakes')
+                        .digest('hex');
         return {
-            token:"sfjdslfjl"
+            hash
         };
     }
 
     export async function isUserExist(account:string):Promise<boolean>{
-        const result = await MongoInst.RoloUsers.findOne({account});
+        const result = await MongoInst.roloUsers.findOne({account});
         return (result as unknown as boolean);
     }
 
     export async function isRegistLegal(account:string):Promise<boolean>{
         return !(await Auth.isUserExist(account));
-    }
-
-    export async function isAuthLegal(account:string):Promise<boolean>{
-        return await Auth.isUserExist(account);
     }
 
 

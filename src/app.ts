@@ -8,6 +8,7 @@ import ServerSetup from './configs/serverSetup';
 import TedisInst from './instances/tedisInst';
 import MongoInst from './instances/mongoInst';
 
+
 export default class App{
 
   public app:Application;

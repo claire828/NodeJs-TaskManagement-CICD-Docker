@@ -4,7 +4,6 @@ import TedisInst from '../instances/tedisInst';
 import MongoInst from '../instances/mongoInst';
 import MongoConfig from '../configs/mongoConfig';
 import Auth from '../modules/auth';
-import Common from '../modules/common';
 
 // TODO Request的Account還沒加入 & 密碼也要加上
 export default class AuthController{
@@ -20,9 +19,9 @@ export default class AuthController{
             const user:MongoConfig.Scheme.UserCollect = {
                 account: req.body.account,
                 pw: "",
-                joinT: Common.NowInSec().toString()
+                joinT: Date.now().exFloorTimeToSec().toString()
             }
-            await MongoInst.RoloUsers.insertOne(user);
+            await MongoInst.roloUsers.insertOne(user);
             const token = Auth.generateToken(user.account);
             Backend.Response.success(res,token);
         }catch(err){
