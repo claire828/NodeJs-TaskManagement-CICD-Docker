@@ -22,7 +22,7 @@ exports.default = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         msg: backend_1.default.Req.PARSEPARAMTYPE.String
     });
     if (!params) {
-        return backend_1.default.Response.error(res, backend_1.default.Response.ErrorCode.InsufficientParameters, 'Insufficient Parameters', 200);
+        return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, 'Insufficient Parameters', 200);
     }
     try {
         const [name, email, msg, time] = [req.body.name, req.body.email, req.body.msg, Math.floor(Date.now() / 1000)];
@@ -36,7 +36,7 @@ exports.default = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         fs_1.default.appendFile('msg.txt', JSON.stringify(formate), (err) => {
             if (err) {
                 console.log(`error:${err}`);
-                return backend_1.default.Response.error(res, backend_1.default.Response.ErrorCode.FailureExecuting, 'fail', 200);
+                return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, 'fail', 200);
             }
             return backend_1.default.Response.success(res, []);
         });

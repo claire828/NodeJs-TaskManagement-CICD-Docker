@@ -9,13 +9,14 @@ export enum TaskStatus{
 }
 
 export default class TaskController{
+    private readonly ExpiredHours = 24;
 
     private responseError(res:express.Response, err:any, msg?:string){
         console.log( err instanceof Error ? err.stack : err);
-        return Backend.Response.error(res,Backend.Response.ErrorCode.FailureExecuting,msg,401);
+        return Backend.Response.error(res,Backend.Response.Status.FailureExecuting,msg,401);
     }
 
-    private get StTime():number{ return Math.floor(Date.now()/1000);}
+    private get stTime():number{ return Date.now().exFloorTimeToSec();}
 
     public async getTasks(req:express.Request, res:express.Response):Promise<void>{
         try{
@@ -31,12 +32,12 @@ export default class TaskController{
         try{
             const email:string = req.body.email;
              const bExist = await this.checkUserExist(email);
-             if(!bExist) return Backend.Response.error(res,Backend.Response.ErrorCode.Verify,'',401);
+             if(!bExist) return Backend.Response.error(res,Backend.Response.Status.Verify,'',401);
             const tasks = {
                 title: req.body.name,
-                st: this.StTime
+                st: this.stTime
             };
-            await TedisInst.get().setex(email, 24*60*60 ,JSON.stringify(tasks));
+            await TedisInst.get().setex(email, this.ExpiredHours.exHoursInSec() ,JSON.stringify(tasks));
             return Backend.Response.success(res,{});
         }catch(err){
              // TODO 資料要補寫到System的Log中

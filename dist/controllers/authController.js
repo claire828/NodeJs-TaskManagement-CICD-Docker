@@ -16,9 +16,19 @@ const backend_1 = __importDefault(require("../modules/backend"));
 class AuthController {
     responseError(res, err, msg) {
         console.log(err instanceof Error ? err.stack : err);
-        return backend_1.default.Response.error(res, backend_1.default.Response.ErrorCode.FailureExecuting, msg, 401);
+        return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 401);
     }
     register(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                backend_1.default.Response.success(res, {});
+            }
+            catch (err) {
+                return this.responseError(res, err);
+            }
+        });
+    }
+    logIn(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 backend_1.default.Response.success(res, {});

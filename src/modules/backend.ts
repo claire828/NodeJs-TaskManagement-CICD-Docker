@@ -27,45 +27,38 @@ namespace Backend{
     }
 
     export namespace Response{
-        export enum ErrorCode {
-            /** 請求結果成功 */
+        export enum Status {
             Success = 0,
-            /** 必要請求參數不足或異常 */
             InsufficientParameters = 1,
-            /** 執行過程發生其他異常 */
-            FailureExecuting = 9,
-            /** 系統維護中 */
-            UnderMaintenance = 10,
-            /** DB Error */
+            FailureExecuting = 2,
             DBError = 11,
-            /** Token error */
             Token = 12,
-            /** Verify error */
             Verify = 13,
         }
-        export interface ResStruct {
-            ErrorCode: ErrorCode;
-            Message: string;
-            Data: object;
+        export interface ServerResponceContent {
+            status: Status;
+            message: string;
+            data?: object;
         }
 
         // tslint:disable-next-line: no-shadowed-variable
-        function generateResponse(ErrorCode:ErrorCode, Message:string, Data: object):ResStruct{
+        function generateResponse(status:Status, message:string, data?: object):ServerResponceContent{
             return {
-                ErrorCode,
-                Message,
-                Data
+                status,
+                message,
+                data
             }
         }
 
-        export function error(res: express.Response, code: ErrorCode | number, msg: string, status:number): void {
+        export function error(res: express.Response, code: Status | number, msg: string, status:number): void {
             console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] fail code:${code}, msg:${msg}`);
-            res.status(status).send(generateResponse(code, msg,{}));
+            const responseInfo:ServerResponceContent = generateResponse(code, msg)
+            res.status(status).send(responseInfo);
         }
 
         export function success<T extends object>(res: express.Response, data: T): void {
             console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] success data:${JSON.stringify(data)}`);
-            res.send(generateResponse(ErrorCode.Success, '',data));
+            res.send(generateResponse(Status.Success, '',data));
         }
     }
 }

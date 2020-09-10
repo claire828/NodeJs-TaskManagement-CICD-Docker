@@ -34,7 +34,12 @@ class Mongo {
 // tslint:disable-next-line: no-namespace
 namespace Mongo {
     export enum Dbs {
+        Rolo = 'rolo',
+    }
+
+    export enum Collections{
         Tasks = 'tasks',
+        Users = 'users'
     }
 }
 

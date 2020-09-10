@@ -30,7 +30,7 @@ var Middleware;
     function verifyPostBody(req, res, next) {
         console.log(`[middleware]method:${req.method}, path:${req.path}, body:${JSON.stringify(req.body)}`);
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            console.log("[middleware] post 沒過  return掉");
+            console.log("[middleware] post 沒過  return");
             return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, 'Empty POST', 200);
         }
         next();
@@ -56,5 +56,5 @@ var Middleware;
     }
     Middleware.verifyAuthorize = verifyAuthorize;
 })(Middleware || (Middleware = {}));
-exports.default = System;
-//# sourceMappingURL=system.js.map
+exports.default = Middleware;
+//# sourceMappingURL=middleware.js.map

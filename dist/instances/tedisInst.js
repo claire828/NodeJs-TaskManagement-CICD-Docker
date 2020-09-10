@@ -9,7 +9,7 @@ const serverSetup_1 = __importDefault(require("../configs/serverSetup"));
 var TedisInst;
 (function (TedisInst) {
     let inst;
-    function initRedis() {
+    function init() {
         return new Promise((resolve, reject) => {
             inst = new tedis_1.Tedis({
                 port: serverSetup_1.default.redis.port,
@@ -31,7 +31,7 @@ var TedisInst;
             console.log(`EEEERR:${err}`);
         });
     }
-    TedisInst.initRedis = initRedis;
+    TedisInst.init = init;
     function get() {
         return inst;
     }

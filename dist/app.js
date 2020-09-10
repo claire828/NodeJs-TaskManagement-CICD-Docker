@@ -15,21 +15,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const system_1 = __importDefault(require("./modules/system"));
+const middleware_1 = __importDefault(require("./modules/middleware"));
 const routers_1 = require("./routes/routers");
 const serverSetup_1 = __importDefault(require("./configs/serverSetup"));
 const tedisInst_1 = __importDefault(require("./instances/tedisInst"));
 const mongoInst_1 = __importDefault(require("./instances/mongoInst"));
 class App {
     constructor() {
-        this.initialInstances();
-        this.app = express_1.default();
-        this.applyMiddlewares();
-        this.addRoutes();
+        this.initial();
+    }
+    initial() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.app = express_1.default();
+            this.applyMiddlewares();
+            this.addRoutes();
+            this.redirectUnexpectedRoute();
+            yield this.initialInstances();
+        });
     }
     initialInstances() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield tedisInst_1.default.initRedis();
+            yield tedisInst_1.default.init();
             yield mongoInst_1.default.init();
         });
     }
@@ -37,12 +43,15 @@ class App {
         this.app.use(body_parser_1.default.json());
         this.app.use(body_parser_1.default.urlencoded({ extended: true }));
         this.app.use(cookie_parser_1.default());
-        this.app.use(system_1.default.Middleware.addCorsHeader);
+        this.app.use(middleware_1.default.addCorsHeader);
     }
     addRoutes() {
         routers_1.Routers.forEach(route => {
             this.app.use(route.getRouter().bind(route));
         });
+    }
+    redirectUnexpectedRoute() {
+        this.app.use(middleware_1.default.unknownRoute);
     }
     listen() {
         this.app.listen(serverSetup_1.default.server.port, () => {

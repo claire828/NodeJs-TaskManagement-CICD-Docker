@@ -47,8 +47,13 @@ Mongo.instance = undefined;
 (function (Mongo) {
     let Dbs;
     (function (Dbs) {
-        Dbs["Tasks"] = "tasks";
+        Dbs["Rolo"] = "rolo";
     })(Dbs = Mongo.Dbs || (Mongo.Dbs = {}));
+    let Collections;
+    (function (Collections) {
+        Collections["Tasks"] = "tasks";
+        Collections["Users"] = "users";
+    })(Collections = Mongo.Collections || (Mongo.Collections = {}));
 })(Mongo || (Mongo = {}));
 exports.default = Mongo;
 //# sourceMappingURL=mongoInst.js.map

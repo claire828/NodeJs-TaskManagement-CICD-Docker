@@ -5,7 +5,7 @@ import ServerSetup from '../configs/serverSetup';
 namespace TedisInst{
     let inst:Tedis;
 
-    export function initRedis(){
+    export function init(){
 
         return new Promise((resolve, reject) => {
             inst = new Tedis({

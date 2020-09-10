@@ -31,39 +31,32 @@ var Backend;
     })(Req = Backend.Req || (Backend.Req = {}));
     let Response;
     (function (Response) {
-        let ErrorCode;
-        (function (ErrorCode) {
-            /** 請求結果成功 */
-            ErrorCode[ErrorCode["Success"] = 0] = "Success";
-            /** 必要請求參數不足或異常 */
-            ErrorCode[ErrorCode["InsufficientParameters"] = 1] = "InsufficientParameters";
-            /** 執行過程發生其他異常 */
-            ErrorCode[ErrorCode["FailureExecuting"] = 9] = "FailureExecuting";
-            /** 系統維護中 */
-            ErrorCode[ErrorCode["UnderMaintenance"] = 10] = "UnderMaintenance";
-            /** DB Error */
-            ErrorCode[ErrorCode["DBError"] = 11] = "DBError";
-            /** Token error */
-            ErrorCode[ErrorCode["Token"] = 12] = "Token";
-            /** Verify error */
-            ErrorCode[ErrorCode["Verify"] = 13] = "Verify";
-        })(ErrorCode = Response.ErrorCode || (Response.ErrorCode = {}));
+        let Status;
+        (function (Status) {
+            Status[Status["Success"] = 0] = "Success";
+            Status[Status["InsufficientParameters"] = 1] = "InsufficientParameters";
+            Status[Status["FailureExecuting"] = 2] = "FailureExecuting";
+            Status[Status["DBError"] = 11] = "DBError";
+            Status[Status["Token"] = 12] = "Token";
+            Status[Status["Verify"] = 13] = "Verify";
+        })(Status = Response.Status || (Response.Status = {}));
         // tslint:disable-next-line: no-shadowed-variable
-        function generateResponse(ErrorCode, Message, Data) {
+        function generateResponse(status, message, data) {
             return {
-                ErrorCode,
-                Message,
-                Data
+                status,
+                message,
+                data
             };
         }
         function error(res, code, msg, status) {
             console.log(`[Req:${JSON.stringify((res === null || res === void 0 ? void 0 : res.req.route.path) || "")}] fail code:${code}, msg:${msg}`);
-            res.status(status).send(generateResponse(code, msg, {}));
+            const responseInfo = generateResponse(code, msg);
+            res.status(status).send(responseInfo);
         }
         Response.error = error;
         function success(res, data) {
             console.log(`[Req:${JSON.stringify((res === null || res === void 0 ? void 0 : res.req.route.path) || "")}] success data:${JSON.stringify(data)}`);
-            res.send(generateResponse(ErrorCode.Success, '', data));
+            res.send(generateResponse(Status.Success, '', data));
         }
         Response.success = success;
     })(Response = Backend.Response || (Backend.Response = {}));

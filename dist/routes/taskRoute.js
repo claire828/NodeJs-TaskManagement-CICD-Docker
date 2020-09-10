@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const taskController_1 = __importDefault(require("../controllers/taskController"));
-const system_1 = __importDefault(require("../modules/system"));
+const middleware_1 = __importDefault(require("../modules/middleware"));
 const basicRoute_1 = __importDefault(require("./basicRoute"));
 class TaskRoute extends basicRoute_1.default {
     constructor() {
@@ -16,9 +16,9 @@ class TaskRoute extends basicRoute_1.default {
     }
     setRoutes() {
         // TODO 這邊的前墜可以封裝，直接問發好了
-        this.router.post('/task/add', system_1.default.Middleware.verifyPostBody, system_1.default.Middleware.verifyAuthorize, this.taskController.addTask.bind(this.taskController));
-        this.router.post('/task/get', system_1.default.Middleware.verifyPostBody, system_1.default.Middleware.verifyAuthorize, this.taskController.getTasks.bind(this.taskController));
-        this.router.post('/task/conform', system_1.default.Middleware.verifyPostBody, system_1.default.Middleware.verifyAuthorize, this.taskController.conformTask.bind(this.taskController));
+        this.router.post('/task/add', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthorize, this.taskController.addTask.bind(this.taskController));
+        this.router.post('/task/get', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthorize, this.taskController.getTasks.bind(this.taskController));
+        this.router.post('/task/conform', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthorize, this.taskController.conformTask.bind(this.taskController));
     }
 }
 exports.default = TaskRoute;

@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authController_1 = __importDefault(require("../controllers/authController"));
-const system_1 = __importDefault(require("../modules/system"));
+const middleware_1 = __importDefault(require("../modules/middleware"));
 const basicRoute_1 = __importDefault(require("./basicRoute"));
 class AuthRoute extends basicRoute_1.default {
     constructor() {
@@ -15,7 +15,8 @@ class AuthRoute extends basicRoute_1.default {
         this.setRoutes();
     }
     setRoutes() {
-        this.router.post('/auth/register', system_1.default.Middleware.verifyPostBody, system_1.default.Middleware.verifyAuthorize, this.authController.register.bind(this.authController));
+        this.router.post('/auth/register', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthorize, this.authController.register.bind(this.authController));
+        this.router.post('/auth/login', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthorize, this.authController.logIn.bind(this.authController));
     }
 }
 exports.default = AuthRoute;

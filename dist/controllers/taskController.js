@@ -22,11 +22,14 @@ var TaskStatus;
     TaskStatus[TaskStatus["Expired"] = 2] = "Expired";
 })(TaskStatus = exports.TaskStatus || (exports.TaskStatus = {}));
 class TaskController {
+    constructor() {
+        this.ExpiredHours = 24;
+    }
     responseError(res, err, msg) {
         console.log(err instanceof Error ? err.stack : err);
-        return backend_1.default.Response.error(res, backend_1.default.Response.ErrorCode.FailureExecuting, msg, 401);
+        return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 401);
     }
-    get StTime() { return Math.floor(Date.now() / 1000); }
+    get stTime() { return Date.now().exFloorTimeToSec(); }
     getTasks(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -45,12 +48,12 @@ class TaskController {
                 const email = req.body.email;
                 const bExist = yield this.checkUserExist(email);
                 if (!bExist)
-                    return backend_1.default.Response.error(res, backend_1.default.Response.ErrorCode.Verify, '', 401);
+                    return backend_1.default.Response.error(res, backend_1.default.Response.Status.Verify, '', 401);
                 const tasks = {
                     title: req.body.name,
-                    st: this.StTime
+                    st: this.stTime
                 };
-                yield tedisInst_1.default.get().setex(email, 24 * 60 * 60, JSON.stringify(tasks));
+                yield tedisInst_1.default.get().setex(email, this.ExpiredHours.exHoursInSec(), JSON.stringify(tasks));
                 return backend_1.default.Response.success(res, {});
             }
             catch (err) {

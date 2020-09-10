@@ -2,7 +2,7 @@ import express from 'express';
 import { Application } from 'express'
 import BodyParse from 'body-parser';
 import CookieParse from 'cookie-parser';
-import System from './modules/system';
+import Middleware from './modules/middleware';
 import { Routers } from './routes/routers';
 import ServerSetup from './configs/serverSetup';
 import TedisInst from './instances/tedisInst';
@@ -13,28 +13,37 @@ export default class App{
   public app:Application;
 
   constructor(){
-    this.initialInstances();
+    this.initial();
+  }
+
+  public async initial(){
     this.app = express();
     this.applyMiddlewares();
     this.addRoutes();
+    this.redirectUnexpectedRoute();
+    await this.initialInstances();
   }
 
   private async initialInstances(){
-     await TedisInst.initRedis();
-     await MongoInst.init();
+    await TedisInst.init();
+    await MongoInst.init();
   }
 
   private applyMiddlewares(){
-      this.app.use(BodyParse.json());
-      this.app.use(BodyParse.urlencoded({extended:true}));
-      this.app.use(CookieParse());
-      this.app.use(System.Middleware.addCorsHeader);
+    this.app.use(BodyParse.json());
+    this.app.use(BodyParse.urlencoded({extended:true}));
+    this.app.use(CookieParse());
+    this.app.use(Middleware.addCorsHeader);
   }
 
   private addRoutes() {
     Routers.forEach(route=> {
       this.app.use(route.getRouter().bind(route));
     });
+  }
+
+  private redirectUnexpectedRoute(){
+      this.app.use(Middleware.unknownRoute);
   }
 
   public listen() {
