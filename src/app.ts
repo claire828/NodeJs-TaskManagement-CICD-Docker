@@ -33,6 +33,7 @@ export default class App{
     this.app.use(BodyParse.json());
     this.app.use(BodyParse.urlencoded({extended:true}));
     this.app.use(CookieParse());
+    this.app.use(Middleware.log);
     this.app.use(Middleware.addCorsHeader);
   }
 

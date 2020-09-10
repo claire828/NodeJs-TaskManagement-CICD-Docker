@@ -24,13 +24,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __importStar(require("underscore"));
 const backend_1 = __importDefault(require("./backend"));
+const auth_1 = __importDefault(require("./auth"));
 // tslint:disable-next-line: no-namespace
 var Middleware;
 (function (Middleware) {
+    function log(req, res, next) {
+        console.log(`【${req.method}】path:【${req.path}】, \n body:【${JSON.stringify(req.body)}】`);
+        next();
+    }
+    Middleware.log = log;
     function verifyPostBody(req, res, next) {
-        console.log(`[middleware]method:${req.method}, path:${req.path}, body:${JSON.stringify(req.body)}`);
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            console.log("[middleware] post 沒過  return");
             return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, 'Empty POST', 200);
         }
         next();
@@ -50,11 +54,28 @@ var Middleware;
         return res.status(403).end();
     }
     Middleware.unknownRoute = unknownRoute;
-    function verifyAuthorize(req, res, next) {
-        // TODO HMAC解密實作
+    /*
+     * 驗證（不理會帳號是否存在，提供給註冊的要求使用）
+     */
+    function verifyOnlyAuthorize(req, res, next) {
+        const bSuccess = auth_1.default.VerifyToken(req);
+        if (!bSuccess)
+            return backend_1.default.Response.verifyError(res);
         next();
     }
-    Middleware.verifyAuthorize = verifyAuthorize;
+    Middleware.verifyOnlyAuthorize = verifyOnlyAuthorize;
+    /**
+     * 驗證＋帳號合法性
+     */
+    function verifyAuthAndMember(req, res, next) {
+        const user = "";
+        const bAuth = auth_1.default.VerifyToken(req);
+        const bUser = auth_1.default.IsUserExist(user);
+        if (!bUser || !bAuth)
+            return backend_1.default.Response.verifyError(res);
+        next();
+    }
+    Middleware.verifyAuthAndMember = verifyAuthAndMember;
 })(Middleware || (Middleware = {}));
 exports.default = Middleware;
 //# sourceMappingURL=middleware.js.map

@@ -53,13 +53,22 @@ namespace Backend{
         export function error(res: express.Response, code: Status | number, msg: string, status:number): void {
             console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] fail code:${code}, msg:${msg}`);
             const responseInfo:ServerResponceContent = generateResponse(code, msg)
-            res.status(status).send(responseInfo);
+            res.status(status).send(responseInfo).end();
         }
 
         export function success<T extends object>(res: express.Response, data: T): void {
             console.log(`[Req:${JSON.stringify(res?.req.route.path || "")}] success data:${JSON.stringify(data)}`);
             res.send(generateResponse(Status.Success, '',data));
         }
+
+        export function verifyError(res: express.Response ): void {
+            error(res, Status.Verify, "invalid client", 401);
+        }
+
+        export function requestError(res: express.Response ): void {
+            error(res, Status.InsufficientParameters, "invalid request", 400);
+        }
+
     }
 }
 export default Backend;

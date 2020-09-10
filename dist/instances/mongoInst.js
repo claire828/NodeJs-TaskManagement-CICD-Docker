@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
 const serverSetup_1 = __importDefault(require("../configs/serverSetup"));
-class Mongo {
+class MongoInst {
     static init() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -42,18 +42,6 @@ class Mongo {
         return this.instance;
     }
 }
-Mongo.instance = undefined;
-// tslint:disable-next-line: no-namespace
-(function (Mongo) {
-    let Dbs;
-    (function (Dbs) {
-        Dbs["Rolo"] = "rolo";
-    })(Dbs = Mongo.Dbs || (Mongo.Dbs = {}));
-    let Collections;
-    (function (Collections) {
-        Collections["Tasks"] = "tasks";
-        Collections["Users"] = "users";
-    })(Collections = Mongo.Collections || (Mongo.Collections = {}));
-})(Mongo || (Mongo = {}));
-exports.default = Mongo;
+MongoInst.instance = undefined;
+exports.default = MongoInst;
 //# sourceMappingURL=mongoInst.js.map

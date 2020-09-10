@@ -15,8 +15,8 @@ class AuthRoute extends basicRoute_1.default {
         this.setRoutes();
     }
     setRoutes() {
-        this.router.post('/auth/register', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthorize, this.authController.register.bind(this.authController));
-        this.router.post('/auth/login', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthorize, this.authController.logIn.bind(this.authController));
+        this.router.post('/auth/register', middleware_1.default.verifyPostBody, middleware_1.default.verifyOnlyAuthorize, this.authController.register.bind(this.authController));
+        this.router.post('/auth/login', middleware_1.default.verifyPostBody, middleware_1.default.verifyAuthAndMember, this.authController.logIn.bind(this.authController));
     }
 }
 exports.default = AuthRoute;

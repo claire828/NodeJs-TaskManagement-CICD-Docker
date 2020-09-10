@@ -51,7 +51,7 @@ var Backend;
         function error(res, code, msg, status) {
             console.log(`[Req:${JSON.stringify((res === null || res === void 0 ? void 0 : res.req.route.path) || "")}] fail code:${code}, msg:${msg}`);
             const responseInfo = generateResponse(code, msg);
-            res.status(status).send(responseInfo);
+            res.status(status).send(responseInfo).end();
         }
         Response.error = error;
         function success(res, data) {
@@ -59,6 +59,14 @@ var Backend;
             res.send(generateResponse(Status.Success, '', data));
         }
         Response.success = success;
+        function verifyError(res) {
+            error(res, Status.Verify, "invalid client", 401);
+        }
+        Response.verifyError = verifyError;
+        function requestError(res) {
+            error(res, Status.InsufficientParameters, "invalid request", 400);
+        }
+        Response.requestError = requestError;
     })(Response = Backend.Response || (Backend.Response = {}));
 })(Backend || (Backend = {}));
 exports.default = Backend;

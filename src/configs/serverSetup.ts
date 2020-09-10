@@ -1,4 +1,4 @@
-import * as server from './server.json';
+import * as server from './setup/server.json';
 export interface ServerSetup {
     server: {
        port: number

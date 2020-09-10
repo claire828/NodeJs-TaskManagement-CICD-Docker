@@ -1,7 +1,8 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
 import ServerSetup from '../configs/serverSetup';
+import MongoConfig from '../configs/mongoConfig'
 
-class Mongo {
+class MongoInst {
     private static instance: MongoClient = undefined;
 
     public static async init(): Promise<void> {
@@ -22,7 +23,7 @@ class Mongo {
         }
     }
 
-    public static getDb(name: Mongo.Dbs) {
+    public static getDb(name: MongoConfig.Dbs) {
         return this.instance.db(name);
     }
 
@@ -31,16 +32,4 @@ class Mongo {
     }
 }
 
-// tslint:disable-next-line: no-namespace
-namespace Mongo {
-    export enum Dbs {
-        Rolo = 'rolo',
-    }
-
-    export enum Collections{
-        Tasks = 'tasks',
-        Users = 'users'
-    }
-}
-
-export default Mongo;
+export default MongoInst;
