@@ -1,5 +1,5 @@
 import { Tedis, TedisPool } from "tedis";
-import ServerSetup from '../configs/serverSetup';
+import ServerSetup from '../setups/serverSetup';
 
 // tslint:disable-next-line: no-namespace
 namespace TedisInst{

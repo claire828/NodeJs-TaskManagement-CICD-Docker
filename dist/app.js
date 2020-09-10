@@ -17,7 +17,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const middleware_1 = __importDefault(require("./modules/middleware"));
 const routers_1 = require("./routes/routers");
-const serverSetup_1 = __importDefault(require("./configs/serverSetup"));
+const serverSetup_1 = __importDefault(require("./setups/serverSetup"));
 const tedisInst_1 = __importDefault(require("./instances/tedisInst"));
 const mongoInst_1 = __importDefault(require("./instances/mongoInst"));
 class App {

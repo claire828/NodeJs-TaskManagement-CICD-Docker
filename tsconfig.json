@@ -11,8 +11,7 @@
         "paths": {
             "*": [
                 "./node_modules/*"
-            ],
-            "@extensions/*": [ "./extensions/*" ]
+            ]
         },
         "resolveJsonModule" : true
     },

@@ -4,7 +4,7 @@ import BodyParse from 'body-parser';
 import CookieParse from 'cookie-parser';
 import Middleware from './modules/middleware';
 import { Routers } from './routes/routers';
-import ServerSetup from './configs/serverSetup';
+import ServerSetup from './setups/serverSetup';
 import TedisInst from './instances/tedisInst';
 import MongoInst from './instances/mongoInst';
 
@@ -46,13 +46,13 @@ export default class App{
   }
 
   private redirectUnexpectedRoute(){
-      this.app.use(Middleware.unknownRoute);
+    this.app.use(Middleware.unknownRoute);
   }
 
   public listen() {
-      this.app.listen(ServerSetup.server.port, () => {
-          console.log(`⚡️[server]: Server is running at http://localhost:${ServerSetup.server.port}`)
-      });
+    this.app.listen(ServerSetup.server.port, () => {
+        console.log(`⚡️[server]: Server is running at http://localhost:${ServerSetup.server.port}`)
+    });
   }
 
 

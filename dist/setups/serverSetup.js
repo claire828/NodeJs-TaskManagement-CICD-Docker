@@ -20,7 +20,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServerSetup = void 0;
-const server = __importStar(require("../setup/server.json"));
+const server = __importStar(require("./server.json"));
 // tslint:disable-next-line: no-var-requires
 exports.ServerSetup = server;
 exports.default = exports.ServerSetup;

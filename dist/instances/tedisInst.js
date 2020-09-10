@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const tedis_1 = require("tedis");
-const serverSetup_1 = __importDefault(require("../configs/serverSetup"));
+const serverSetup_1 = __importDefault(require("../setups/serverSetup"));
 // tslint:disable-next-line: no-namespace
 var TedisInst;
 (function (TedisInst) {

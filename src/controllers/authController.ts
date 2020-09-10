@@ -1,6 +1,5 @@
 import express, { json } from 'express';
 import Backend from '../modules/backend';
-import TedisInst from '../instances/tedisInst';
 import MongoInst from '../instances/mongoInst';
 import MongoConfig from '../configs/mongoConfig';
 import Auth from '../modules/auth';

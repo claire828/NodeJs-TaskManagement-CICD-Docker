@@ -1,7 +1,6 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
-import ServerSetup from '../configs/serverSetup';
+import ServerSetup from '../setups/serverSetup';
 import MongoConfig from '../configs/mongoConfig'
-import { Collection } from "underscore";
 
 class MongoInst {
     private static instance: MongoClient = undefined;

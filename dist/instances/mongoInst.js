@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
-const serverSetup_1 = __importDefault(require("../configs/serverSetup"));
+const serverSetup_1 = __importDefault(require("../setups/serverSetup"));
 const mongoConfig_1 = __importDefault(require("../configs/mongoConfig"));
 class MongoInst {
     static init() {

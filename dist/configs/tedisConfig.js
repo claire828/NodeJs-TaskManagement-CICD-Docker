@@ -1,14 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // tslint:disable-next-line: no-namespace
-var TaskConfig;
-(function (TaskConfig) {
-    let ETask;
-    (function (ETask) {
-        ETask[ETask["Draf"] = 0] = "Draf";
-        ETask[ETask["Conform"] = 1] = "Conform";
-        ETask[ETask["Done"] = 2] = "Done";
-    })(ETask = TaskConfig.ETask || (TaskConfig.ETask = {}));
-})(TaskConfig || (TaskConfig = {}));
-exports.default = TaskConfig;
+var TedisConfig;
+(function (TedisConfig) {
+    let Pools;
+    (function (Pools) {
+        Pools[Pools["Draf"] = 0] = "Draf";
+        Pools[Pools["Cache"] = 1] = "Cache";
+    })(Pools = TedisConfig.Pools || (TedisConfig.Pools = {}));
+})(TedisConfig || (TedisConfig = {}));
+exports.default = TedisConfig;
 //# sourceMappingURL=tedisConfig.js.map
