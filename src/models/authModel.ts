@@ -10,7 +10,7 @@ import { LoginToken } from "../modules/token";
 
 export default class AuthModel{
 
-    public static async register(account:string, pw:string):Promise<Backend.Response.Status>{
+    public static async registerUser(account:string, pw:string):Promise<Backend.Response.Status>{
         const bValidation = await this.validateRegist(account);
         if(bValidation!== Backend.Response.Status.Success) return bValidation;
         try{
@@ -20,14 +20,18 @@ export default class AuthModel{
                 pw:hashedPassword,
                 joinT :Date.now().exFloorTimeToSec().toString()
             }
-            console.log(`存進去Mongo: ${JSON.stringify(user)}`);
-             MongoInst.roloUsers.insertOne(user);
+            MongoInst.roloUsers.insertOne(user);
             return Backend.Response.Status.Success;
         }catch(err){
             return Backend.Response.Status.FailureExecuting;
         }
     }
 
+    public static async isUserMath(account:string, pw:string):Promise<boolean>{
+        const member = await MongoInst.roloUsers.findOne({account});
+        if(!member) return false;
+        return await bcrypt.compare(pw,member.pw);
+    }
 
 
     private static async validateRegist(account:string):Promise<Backend.Response.Status>{
@@ -43,7 +47,7 @@ export default class AuthModel{
         return re.test(String(email).toLowerCase());
     }
 
-    private static async isUserExist(account:string):Promise<boolean>{
+    public static async isUserExist(account:string):Promise<boolean>{
         const result = await MongoInst.roloUsers.findOne({account});
         return (result as unknown as boolean);
     }

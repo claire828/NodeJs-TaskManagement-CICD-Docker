@@ -20,7 +20,7 @@ const backend_1 = __importDefault(require("../modules/backend"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const token_1 = require("../modules/token");
 class AuthModel {
-    static register(account, pw) {
+    static registerUser(account, pw) {
         return __awaiter(this, void 0, void 0, function* () {
             const bValidation = yield this.validateRegist(account);
             if (bValidation !== backend_1.default.Response.Status.Success)
@@ -32,13 +32,20 @@ class AuthModel {
                     pw: hashedPassword,
                     joinT: Date.now().exFloorTimeToSec().toString()
                 };
-                console.log(`存進去Mongo: ${JSON.stringify(user)}`);
                 mongoInst_1.default.roloUsers.insertOne(user);
                 return backend_1.default.Response.Status.Success;
             }
             catch (err) {
                 return backend_1.default.Response.Status.FailureExecuting;
             }
+        });
+    }
+    static isUserMath(account, pw) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const member = yield mongoInst_1.default.roloUsers.findOne({ account });
+            if (!member)
+                return false;
+            return yield bcrypt_1.default.compare(pw, member.pw);
         });
     }
     static validateRegist(account) {
