@@ -62,7 +62,6 @@ export default class TaskModel{
             const cacheList:TaskConfig.Task[] = (oldCache.exToObj() as TaskConfig.Task[]);
             const mappingStruct = this.generateMappingStruct(draf,tId,TaskConfig.Status.Draf);
             cacheList.push(this.mappingDrafToTaskStruct(mappingStruct));
-            console.log("在Cache Server 插入草稿的資料");
             this.SaveTasksToCacheServers(account,cacheList);
         }
     }
@@ -73,10 +72,7 @@ export default class TaskModel{
         if(oldCache){
             const cacheList:TaskConfig.Task[] = (oldCache.exToObj() as TaskConfig.Task[]);
             const inx = cacheList.findIndex( x=> x.tId === tId);
-            const task = cacheList.exRemoveAt(inx);
-            task.status = TaskConfig.Status.Conform;
-            cacheList.push(task);
-            console.log("在Cache Server update的資料");
+            cacheList[inx].status = TaskConfig.Status.Conform;
             this.SaveTasksToCacheServers(account,cacheList);
         }
     }
@@ -105,7 +101,8 @@ export default class TaskModel{
             title:struct.draf.title,
             content:struct.draf.content,
             tId:struct.tId,
-            status:struct.status
+            status:struct.status,
+            t:struct.time
         }
     }
 
