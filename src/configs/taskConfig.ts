@@ -17,8 +17,8 @@ namespace TaskConfig{
         asign?:string,
     }
     export type Time = {
-        st:string | number,
-        et?:string | number,
+        st:string,
+        et?:string,
     }
 
 }

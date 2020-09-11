@@ -17,10 +17,10 @@ export enum TaskStatus{
 
 export default class TaskController {
 
-
     private unknowErrorHandler(res:express.Response, err:any, msg?:string){
-        console.log( err instanceof Error ? err.stack : err);
-        return Backend.Response.error(res,Backend.Response.Status.FailureExecuting,msg,401);
+        // TODO 資料要補寫到System的Log中
+        console.log(`##CatchError##:${err instanceof Error ? err.stack : err}`);
+        return Backend.Response.error(res,Backend.Response.Status.FailureExecuting,msg,400);
     }
 
     /**
@@ -31,7 +31,7 @@ export default class TaskController {
     public async getTasks(req:express.Request, res:express.Response):Promise<void>{
         try{
             const account:string = req.body.account;
-            const allTasks = await TaskModel.getTasksFromCacheServer(account);
+            const allTasks = await TaskModel.getTasks(account);
             Backend.Response.success(res,allTasks);
         }catch(err){
             return this.unknowErrorHandler(res,err);
@@ -46,17 +46,17 @@ export default class TaskController {
     public async addTask(req:express.Request, res:express.Response):Promise<void>{
         try{
             const task:TaskConfig.Draf = {
-                title:"",
-                content:"",
+                title: req.body.title,
+                content: req.body.content
             }
             const account:string = req.body.account;
-            const bSuccess = await TaskModel.addDrafToServer(account,task);
+            const tId:string = TaskModel.generateTaskID(account);
+            const bSuccess = await TaskModel.addTask(account,task,tId);
             if(bSuccess){
                 return Backend.Response.success(res,{});
             }
             return Backend.Response.error(res,Backend.Response.Status.DBError,"",201);
         }catch(err){
-             // TODO 資料要補寫到System的Log中
             return this.unknowErrorHandler(res,err);
         }
     }
@@ -71,10 +71,10 @@ export default class TaskController {
         try{
             const account:string = req.body.account;
             const tId:string = req.body.tid;
-            await TaskModel.conformDrafToTask(account,tId);
-            return Backend.Response.success(res,{});
+            const success = await TaskModel.conformDrafToTask(account,tId);
+            return success ? Backend.Response.success(res,{}) : Backend.Response.error(res,Backend.Response.Status.DBError,"",400);
         }catch(err){
-            return this.unknowErrorHandler(res,err);
+            // return this.unknowErrorHandler(res,err);
         }
     }
 

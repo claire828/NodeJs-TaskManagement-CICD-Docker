@@ -26,8 +26,9 @@ var TaskStatus;
 })(TaskStatus = exports.TaskStatus || (exports.TaskStatus = {}));
 class TaskController {
     unknowErrorHandler(res, err, msg) {
-        console.log(err instanceof Error ? err.stack : err);
-        return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 401);
+        // TODO 資料要補寫到System的Log中
+        console.log(`##CatchError##:${err instanceof Error ? err.stack : err}`);
+        return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 400);
     }
     /**
      * [API EndPoint] Get All Tasks
@@ -38,7 +39,7 @@ class TaskController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const account = req.body.account;
-                const allTasks = yield taskModel_1.default.getTasksFromCacheServer(account);
+                const allTasks = yield taskModel_1.default.getTasks(account);
                 backend_1.default.Response.success(res, allTasks);
             }
             catch (err) {
@@ -55,18 +56,18 @@ class TaskController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const task = {
-                    title: "",
-                    content: "",
+                    title: req.body.title,
+                    content: req.body.content
                 };
                 const account = req.body.account;
-                const bSuccess = yield taskModel_1.default.addDrafToServer(account, task);
+                const tId = taskModel_1.default.generateTaskID(account);
+                const bSuccess = yield taskModel_1.default.addTask(account, task, tId);
                 if (bSuccess) {
                     return backend_1.default.Response.success(res, {});
                 }
                 return backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 201);
             }
             catch (err) {
-                // TODO 資料要補寫到System的Log中
                 return this.unknowErrorHandler(res, err);
             }
         });
@@ -81,11 +82,11 @@ class TaskController {
             try {
                 const account = req.body.account;
                 const tId = req.body.tid;
-                yield taskModel_1.default.conformDrafToTask(account, tId);
-                return backend_1.default.Response.success(res, {});
+                const success = yield taskModel_1.default.conformDrafToTask(account, tId);
+                return success ? backend_1.default.Response.success(res, {}) : backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 400);
             }
             catch (err) {
-                return this.unknowErrorHandler(res, err);
+                // return this.unknowErrorHandler(res,err);
             }
         });
     }

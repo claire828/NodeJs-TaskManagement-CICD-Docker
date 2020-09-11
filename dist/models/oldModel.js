@@ -18,30 +18,36 @@ const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 require("../extensions/numberExtension");
 require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
-const cacheModel_1 = __importDefault(require("./cacheModel"));
 // TODO 感覺這個可以新增一個Class作為CacheServer
-class TaskModel {
+class OldModel {
     // [API-getAllTask] 從cache server中取得，如果不存在就從mongo取出
-    static getTasks(account) {
+    static getTasksFromCacheServer(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            let tasks = yield cacheModel_1.default.getTasksFromCacheServer(account);
-            if (tasks)
-                return tasks;
+            console.log("do:取得所有任務清單");
+            const strTasks = yield this.getTask(account);
+            if (strTasks)
+                return strTasks.exToObj();
             console.log("do:CACHE server找不到資料，去MONGO拿");
-            tasks = yield this.retrieveFromServer(account);
-            cacheModel_1.default.SaveTasksToCache(account, tasks);
+            const tasks = yield this.retrieveFromServer(account);
+            console.log("do:拿到了塞回去");
+            this.SaveTasksToCacheServers(account, tasks);
             return tasks;
         });
     }
+    // 儲存整筆Task的快取
+    static SaveTasksToCacheServers(account, allTasks) {
+        tedisInst_1.default.get().setex(account, this.CachedExpiredSec, JSON.stringify(allTasks));
+    }
     // 儲存草稿到Mongo&Redis
-    static addTask(account, draf, tId) {
+    static addDrafToServer(account, draf) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const tId = this.generateTaskID(account);
                 yield Promise.all([
                     tedisInst_1.default.get().setex(tId, this.DrafExpiredSec, JSON.stringify(draf)),
                     mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { drafs: tId } }, { upsert: true })
                 ]);
-                cacheModel_1.default.addTaskToCacheList(account, draf, tId);
+                this.addItemFromCacheList(account, draf, tId);
                 return true;
             }
             catch (err) {
@@ -53,21 +59,40 @@ class TaskModel {
         return __awaiter(this, void 0, void 0, function* () {
             const value = yield this.getTask(tId);
             if (!value)
-                return false;
+                return;
             yield tedisInst_1.default.get().del(tId);
             const draf = value.exToObj();
-            const task = {
-                title: draf.title,
-                content: draf.content,
-                tId,
-                status: TaskConfig_1.default.Status.Conform,
-                t: {
-                    st: Date.now().exFloorTimeToSec().toString()
-                }
-            };
+            const mappingStruct = this.generateMappingStruct(draf, tId, TaskConfig_1.default.Status.Conform, {
+                st: Date.now().exFloorTimeToSec().toString()
+            });
+            const task = this.mappingDrafToTaskStruct(mappingStruct);
             yield mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { tasks: task }, $pull: { drafs: tId } }, { upsert: true });
-            cacheModel_1.default.ConformTaskToCacheList(account, tId, task);
-            return true;
+            this.updateItemFromCacheList(account, mappingStruct);
+        });
+    }
+    // 原有的快取資料中，新增新的快取
+    static addItemFromCacheList(account, draf, tId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const oldCache = yield this.getTask(account);
+            if (oldCache) {
+                const cacheList = oldCache.exToObj();
+                const mappingStruct = this.generateMappingStruct(draf, tId, TaskConfig_1.default.Status.Draf);
+                cacheList.push(this.mappingDrafToTaskStruct(mappingStruct));
+                this.SaveTasksToCacheServers(account, cacheList);
+            }
+        });
+    }
+    static updateItemFromCacheList(account, mappingStruct) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const oldCache = yield this.getTask(account);
+            if (oldCache) {
+                const cacheList = oldCache.exToObj();
+                const inx = cacheList.findIndex(x => x.tId === mappingStruct.tId);
+                const target = cacheList[inx];
+                target.status = TaskConfig_1.default.Status.Conform;
+                target.t = mappingStruct.time;
+                this.SaveTasksToCacheServers(account, cacheList);
+            }
         });
     }
     static getTask(key) {
@@ -87,20 +112,35 @@ class TaskModel {
                 if (!task)
                     continue;
                 const draf = task.exToObj();
-                list.push({
-                    title: draf.title,
-                    content: draf.content,
-                    tId,
-                    status: TaskConfig_1.default.Status.Draf,
-                });
+                const mappingStruct = this.generateMappingStruct(draf, tId, TaskConfig_1.default.Status.Draf);
+                list.push(this.mappingDrafToTaskStruct(mappingStruct));
             }
             return list;
         });
+    }
+    // 媒合草稿到正式
+    static mappingDrafToTaskStruct(struct) {
+        return {
+            title: struct.draf.title,
+            content: struct.draf.content,
+            tId: struct.tId,
+            status: struct.status,
+            t: struct.time
+        };
+    }
+    static generateMappingStruct(draf, tId, status, time) {
+        return {
+            draf,
+            tId,
+            status,
+            time
+        };
     }
     static generateTaskID(account) {
         return `${account}${Date.now().exFloorTimeToSec()}`;
     }
 }
-exports.default = TaskModel;
-TaskModel.DrafExpiredSec = (24).exHoursInSec();
-//# sourceMappingURL=taskModel.js.map
+exports.default = OldModel;
+OldModel.DrafExpiredSec = (24).exHoursInSec();
+OldModel.CachedExpiredSec = (4).exHoursInSec();
+//# sourceMappingURL=oldModel.js.map

@@ -4,79 +4,58 @@ import MongoInst from "../instances/mongoInst";
 import '../extensions/numberExtension';
 import '../extensions/arrayExtension';
 import '../extensions/stringExtension';
+import CacheModel from "./cacheModel";
 
 // TODO 感覺這個可以新增一個Class作為CacheServer
 export default class TaskModel{
     private static readonly DrafExpiredSec = (24).exHoursInSec();
-    private static readonly CachedExpiredSec = (4).exHoursInSec();
-
 
     // [API-getAllTask] 從cache server中取得，如果不存在就從mongo取出
-    public static async getTasksFromCacheServer(account:string):Promise<TaskConfig.Task[]>{
-        console.log("do:取得所有任務清單");
-        const strTasks = await this.getTask(account);
-        if(strTasks) return strTasks.exToObj() as TaskConfig.Task[];
+    public static async getTasks(account:string):Promise<TaskConfig.Task[]>{
+        let tasks = await CacheModel.getTasksFromCacheServer(account);
+        if(tasks) return tasks;
         console.log("do:CACHE server找不到資料，去MONGO拿");
-        const tasks = await this.retrieveFromServer(account);
-        console.log("do:拿到了塞回去");
-        this.SaveTasksToCacheServers(account,tasks);
+        tasks = await this.retrieveFromServer(account);
+        CacheModel.SaveTasksToCache(account,tasks);
         return tasks;
     }
 
-     // 儲存整筆Task的快取
-    private static SaveTasksToCacheServers(account:string, allTasks:TaskConfig.Task[] ){
-        TedisInst.get().setex(account,this.CachedExpiredSec , JSON.stringify(allTasks));
-    }
 
     // 儲存草稿到Mongo&Redis
-    public static async addDrafToServer(account:string, draf:TaskConfig.Draf ):Promise<boolean>{
+    public static async addTask(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>{
         try{
-            const tId:string = this.generateTaskID(account);
+
             await Promise.all([
                 TedisInst.get().setex(tId, this.DrafExpiredSec, JSON.stringify(draf)),
                 MongoInst.roloTasks.updateOne({account},{$addToSet:{drafs:tId}},{upsert:true})
             ]);
-            this.addItemFromCacheList(account, draf, tId);
+            CacheModel.addTaskToCacheList(account, draf, tId);
             return true;
         }catch(err){
             return false;
         }
     }
 
-    public static async conformDrafToTask(account:string, tId:string){
+    public static async conformDrafToTask(account:string, tId:string):Promise<boolean>{
         const value = await this.getTask(tId);
-        if(!value) return;
+        if(!value) return false;
         await TedisInst.get().del(tId);
         const draf = value.exToObj() as TaskConfig.Draf;
-        const mappingStruct = this.generateMappingStruct(draf,tId,TaskConfig.Status.Conform, {
-            st:Date.now().exFloorTimeToSec().toString()
-        });
-        const task = this.mappingDrafToTaskStruct(mappingStruct);
+        const task = {
+            title: draf.title,
+            content: draf.content,
+            tId,
+            status:TaskConfig.Status.Conform,
+            t:{
+                st:Date.now().exFloorTimeToSec().toString()
+            }
+        };
+
         await MongoInst.roloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
-        this.updateItemFromCacheList(account,tId);
+        CacheModel.ConformTaskToCacheList(account, tId , task);
+        return true;
     }
 
-    // 原有的快取資料中，新增新的快取
-    private static async addItemFromCacheList(account:string, draf:TaskConfig.Draf, tId:string){
-        const oldCache = await this.getTask(account)
-        if(oldCache){
-            const cacheList:TaskConfig.Task[] = (oldCache.exToObj() as TaskConfig.Task[]);
-            const mappingStruct = this.generateMappingStruct(draf,tId,TaskConfig.Status.Draf);
-            cacheList.push(this.mappingDrafToTaskStruct(mappingStruct));
-            this.SaveTasksToCacheServers(account,cacheList);
-        }
-    }
-
-
-    private static async updateItemFromCacheList(account:string, tId:string){
-        const oldCache = await this.getTask(account)
-        if(oldCache){
-            const cacheList:TaskConfig.Task[] = (oldCache.exToObj() as TaskConfig.Task[]);
-            const inx = cacheList.findIndex( x=> x.tId === tId);
-            cacheList[inx].status = TaskConfig.Status.Conform;
-            this.SaveTasksToCacheServers(account,cacheList);
-        }
-    }
 
     private static async getTask(key:string):Promise<string>{
         const oldCache = await TedisInst.get().get(key);
@@ -86,50 +65,24 @@ export default class TaskModel{
     // 從正式ＤＢ中取得資料
     private static async retrieveFromServer(account:string):Promise<TaskConfig.Task[]>{
         const target = await MongoInst.roloTasks.findOne({account});
+        const list = target.tasks ?? [];
         for (const tId of target.drafs){
             const task = await this.getTask(tId);
             if(!task) continue;
             const draf = task.exToObj() as TaskConfig.Draf;
-            const mappingStruct = this.generateMappingStruct(draf,tId,TaskConfig.Status.Draf);
-            target.tasks.push(this.mappingDrafToTaskStruct(mappingStruct));
+            list.push({
+                title:draf.title,
+                content:draf.content,
+                tId,
+                status:TaskConfig.Status.Draf,
+            });
         }
-        return target.tasks;
+        return list;
     }
 
-    // 媒合草稿到正式
-    private static mappingDrafToTaskStruct(struct:MappingStruct):TaskConfig.Task{
-        return {
-            title:struct.draf.title,
-            content:struct.draf.content,
-            tId:struct.tId,
-            status:struct.status,
-            t:struct.time
-        }
-    }
-
-
-    private static generateMappingStruct(draf:TaskConfig.Draf,tId:string,status:TaskConfig.Status,time?:TaskConfig.Time):MappingStruct{
-        return {
-            draf,
-            tId,
-            status,
-            time
-        }
-    }
-    private static generateTaskID(account:string):string{
+    public static generateTaskID(account:string):string{
         return `${account}${Date.now().exFloorTimeToSec()}`;
     }
 
 
-}
-
-type MappingStruct = {
-    draf:TaskConfig.Draf,
-    tId:string,
-    status:TaskConfig.Status,
-    time:TaskConfig.Time
-}
-
-function ReverseObjTo<T>(obj:object, to:T) :T{
-    return to as T;
 }
