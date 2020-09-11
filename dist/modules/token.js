@@ -34,6 +34,7 @@ class Token {
     constructor(secret) {
         this.TokenValidateSec = 600;
         this.EncodeType = 'base64';
+        this.SaltRounds = 10;
         this.secret = undefined;
         this.secret = secret;
     }

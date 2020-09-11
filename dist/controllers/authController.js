@@ -17,25 +17,24 @@ const authModel_1 = __importDefault(require("../models/authModel"));
 const underscore_1 = __importDefault(require("underscore"));
 const token_1 = require("../modules/token");
 class AuthController {
-    responseError(res, err, msg) {
-        return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 401);
-    }
     register(req, res) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const account = req.body.account;
-                const pw = req.body.pw;
+                const account = (_a = req.body) === null || _a === void 0 ? void 0 : _a.account;
+                const pw = (_b = req.body) === null || _b === void 0 ? void 0 : _b.pw;
                 let status = backend_1.default.Response.Status.InsufficientParameters;
                 if (!underscore_1.default.isEmpty(account) && underscore_1.default.isString(account) && !underscore_1.default.isEmpty(pw) && underscore_1.default.isString(pw)) {
                     status = yield authModel_1.default.register(account, pw);
                     if (status === backend_1.default.Response.Status.Success) {
                         return backend_1.default.Response.success(res, {});
                     }
+                    return backend_1.default.Response.error(res, status, "Register Failed", 400);
                 }
-                return backend_1.default.Response.error(res, 1, "", status);
+                return backend_1.default.Response.error(res, status, "InsufficientParameters", 400);
             }
             catch (err) {
-                return this.responseError(res, err);
+                console.log("ERRR");
             }
         });
     }
@@ -47,7 +46,7 @@ class AuthController {
                 backend_1.default.Response.success(res, { token });
             }
             catch (err) {
-                return this.responseError(res, err);
+                console.log("ERRR");
             }
         });
     }

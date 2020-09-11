@@ -33,6 +33,8 @@ namespace Backend{
             DBError = 11,
             Token = 12,
             Verify = 13,
+            UserExisting = 14,
+            EmailError=15
         }
         export interface ServerResponceContent {
             status: Status;
@@ -48,10 +50,10 @@ namespace Backend{
             }
         }
 
-        export function error(res: express.Response, code: Status | number, msg: string, status:number): void {
-            console.log(`[Fail code:${code}, msg:${msg}`);
+        export function error(res: express.Response, code: Status , msg: string, htmlStatus:number): void {
+            console.log(`[Fail] code:${code}, msg:${msg}`);
             const responseInfo:ServerResponceContent = generateResponse(code, msg)
-            res.status(status).send(responseInfo).end();
+            res.status(htmlStatus).send(responseInfo).end();
         }
 
         export function success<T extends object>(res: express.Response, data: T): void {
@@ -61,18 +63,6 @@ namespace Backend{
 
         export function verifyError(res: express.Response ): void {
             error(res, Status.Verify, "invalid client", 401);
-        }
-
-        export function requestError(res: express.Response ): void {
-            error(res, Status.InsufficientParameters, "invalid request", 400);
-        }
-
-        export function unknowError(res: express.Response ): void {
-            error(res, Status.FailureExecuting, "request failed", 401);
-        }
-
-        export function userExistError(res: express.Response ): void {
-            error(res, Status.Verify, "user already exist", 401);
         }
 
     }

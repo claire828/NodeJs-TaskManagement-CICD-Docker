@@ -37,16 +37,12 @@ namespace Middleware {
     }
 
      export async function verifyToken(req:express.Request, res:express.Response, next:express.NextFunction){
-        try{
-            const toekn = req.body.token;
-            if(!_.isEmpty(toekn) && _.isString(toekn)){
-                const bLegle = await LoginToken.isTokenLegal(req.body.token);
-                if(bLegle) return next();
-            }
-             Backend.Response.verifyError(res);
-        }catch(err){
-            return Backend.Response.verifyError(res);
+        const toekn = req.body.token;
+        if(!_.isEmpty(toekn) && _.isString(toekn)){
+            const bLegle = await LoginToken.isTokenLegal(req.body.token);
+            if(bLegle) return next();
         }
+        Backend.Response.verifyError(res);
     }
 
 

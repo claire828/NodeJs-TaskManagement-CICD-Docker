@@ -38,6 +38,8 @@ var Backend;
             Status[Status["DBError"] = 11] = "DBError";
             Status[Status["Token"] = 12] = "Token";
             Status[Status["Verify"] = 13] = "Verify";
+            Status[Status["UserExisting"] = 14] = "UserExisting";
+            Status[Status["EmailError"] = 15] = "EmailError";
         })(Status = Response.Status || (Response.Status = {}));
         function generateResponse(status, message, data) {
             return {
@@ -46,10 +48,10 @@ var Backend;
                 data
             };
         }
-        function error(res, code, msg, status) {
-            console.log(`[Fail code:${code}, msg:${msg}`);
+        function error(res, code, msg, htmlStatus) {
+            console.log(`[Fail] code:${code}, msg:${msg}`);
             const responseInfo = generateResponse(code, msg);
-            res.status(status).send(responseInfo).end();
+            res.status(htmlStatus).send(responseInfo).end();
         }
         Response.error = error;
         function success(res, data) {
@@ -61,18 +63,6 @@ var Backend;
             error(res, Status.Verify, "invalid client", 401);
         }
         Response.verifyError = verifyError;
-        function requestError(res) {
-            error(res, Status.InsufficientParameters, "invalid request", 400);
-        }
-        Response.requestError = requestError;
-        function unknowError(res) {
-            error(res, Status.FailureExecuting, "request failed", 401);
-        }
-        Response.unknowError = unknowError;
-        function userExistError(res) {
-            error(res, Status.Verify, "user already exist", 401);
-        }
-        Response.userExistError = userExistError;
     })(Response = Backend.Response || (Backend.Response = {}));
 })(Backend || (Backend = {}));
 exports.default = Backend;

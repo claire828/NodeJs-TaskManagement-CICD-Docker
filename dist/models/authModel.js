@@ -17,39 +17,42 @@ require("../extensions/numberExtension");
 require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
 const backend_1 = __importDefault(require("../modules/backend"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const token_1 = require("../modules/token");
 class AuthModel {
-    static register(account, pw, secreat) {
+    static register(account, pw) {
         return __awaiter(this, void 0, void 0, function* () {
+            const bValidation = yield this.validateRegist(account);
+            if (bValidation !== backend_1.default.Response.Status.Success)
+                return bValidation;
             try {
-                const isAllow = yield this.validateRegist(account);
-                if (isAllow) {
-                    const user = {
-                        account,
-                        pw,
-                        joinT: Date.now().exFloorTimeToSec().toString()
-                    };
-                    mongoInst_1.default.roloUsers.insertOne(user);
-                    return backend_1.default.Response.Status.Success;
-                }
-                return backend_1.default.Response.Status.Verify;
+                const hashedPassword = yield bcrypt_1.default.hash(pw, token_1.LoginToken.SaltRounds);
+                const user = {
+                    account,
+                    pw: hashedPassword,
+                    joinT: Date.now().exFloorTimeToSec().toString()
+                };
+                console.log(`存進去Mongo: ${JSON.stringify(user)}`);
+                mongoInst_1.default.roloUsers.insertOne(user);
+                return backend_1.default.Response.Status.Success;
             }
             catch (err) {
-                return backend_1.default.Response.Status.DBError;
+                return backend_1.default.Response.Status.FailureExecuting;
             }
+        });
+    }
+    static validateRegist(account) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.validateEmail(account)) {
+                const bExist = yield this.isUserExist(account);
+                return bExist ? backend_1.default.Response.Status.UserExisting : backend_1.default.Response.Status.Success;
+            }
+            return backend_1.default.Response.Status.EmailError;
         });
     }
     static validateEmail(email) {
         const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
-    }
-    static validateRegist(account) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const bValidation = this.validateEmail(account);
-            if (bValidation) {
-                return !(yield this.isUserExist(account));
-            }
-            return false;
-        });
     }
     static isUserExist(account) {
         return __awaiter(this, void 0, void 0, function* () {

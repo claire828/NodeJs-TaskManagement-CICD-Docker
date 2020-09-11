@@ -4,6 +4,8 @@ import * as Crypto from "crypto";
 export class Token<T> {
     private readonly TokenValidateSec = 600;
     private readonly EncodeType = 'base64';
+    public readonly SaltRounds = 10;
+
     private secret:string = undefined;
 
     public constructor(secret:string) {

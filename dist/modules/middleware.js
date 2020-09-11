@@ -68,18 +68,13 @@ var Middleware;
     Middleware.unknownRoute = unknownRoute;
     function verifyToken(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const toekn = req.body.token;
-                if (!_.isEmpty(toekn) && _.isString(toekn)) {
-                    const bLegle = yield token_1.LoginToken.isTokenLegal(req.body.token);
-                    if (bLegle)
-                        return next();
-                }
-                backend_1.default.Response.verifyError(res);
+            const toekn = req.body.token;
+            if (!_.isEmpty(toekn) && _.isString(toekn)) {
+                const bLegle = yield token_1.LoginToken.isTokenLegal(req.body.token);
+                if (bLegle)
+                    return next();
             }
-            catch (err) {
-                return backend_1.default.Response.verifyError(res);
-            }
+            backend_1.default.Response.verifyError(res);
         });
     }
     Middleware.verifyToken = verifyToken;
