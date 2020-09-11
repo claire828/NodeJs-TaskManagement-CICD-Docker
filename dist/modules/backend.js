@@ -65,6 +65,14 @@ var Backend;
             error(res, Status.InsufficientParameters, "invalid request", 400);
         }
         Response.requestError = requestError;
+        function unknowError(res) {
+            error(res, Status.FailureExecuting, "request failed", 401);
+        }
+        Response.unknowError = unknowError;
+        function userExistError(res) {
+            error(res, Status.Verify, "user already exist", 401);
+        }
+        Response.userExistError = userExistError;
     })(Response = Backend.Response || (Backend.Response = {}));
 })(Backend || (Backend = {}));
 exports.default = Backend;

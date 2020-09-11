@@ -5,6 +5,7 @@ import '../extensions/numberExtension';
 import '../extensions/arrayExtension';
 import '../extensions/stringExtension';
 
+// TODO 感覺這個可以新增一個Class作為CacheServer
 export default class TaskModel{
     private static readonly DrafExpiredSec = (24).exHoursInSec();
     private static readonly CachedExpiredSec = (4).exHoursInSec();

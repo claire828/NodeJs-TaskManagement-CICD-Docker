@@ -67,6 +67,14 @@ namespace Backend{
             error(res, Status.InsufficientParameters, "invalid request", 400);
         }
 
+        export function unknowError(res: express.Response ): void {
+            error(res, Status.FailureExecuting, "request failed", 401);
+        }
+
+        export function userExistError(res: express.Response ): void {
+            error(res, Status.Verify, "user already exist", 401);
+        }
+
     }
 }
 export default Backend;

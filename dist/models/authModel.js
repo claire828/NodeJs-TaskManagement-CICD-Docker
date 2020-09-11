@@ -18,19 +18,20 @@ require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
 const backend_1 = __importDefault(require("../modules/backend"));
 class AuthModel {
-    static register(account, secreat) {
+    static register(account, pw, secreat) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const bValidation = this.validateEmail(account);
-                if (!bValidation)
-                    return backend_1.default.Response.Status.Verify;
-                const user = {
-                    account,
-                    pw: "",
-                    joinT: Date.now().exFloorTimeToSec().toString()
-                };
-                yield mongoInst_1.default.roloUsers.insertOne(user);
-                return backend_1.default.Response.Status.Success;
+                const isAllow = yield this.validateRegist(account);
+                if (isAllow) {
+                    const user = {
+                        account,
+                        pw,
+                        joinT: Date.now().exFloorTimeToSec().toString()
+                    };
+                    mongoInst_1.default.roloUsers.insertOne(user);
+                    return backend_1.default.Response.Status.Success;
+                }
+                return backend_1.default.Response.Status.Verify;
             }
             catch (err) {
                 return backend_1.default.Response.Status.DBError;
@@ -40,6 +41,21 @@ class AuthModel {
     static validateEmail(email) {
         const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
+    }
+    static validateRegist(account) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const bValidation = this.validateEmail(account);
+            if (bValidation) {
+                return !(yield this.isUserExist(account));
+            }
+            return false;
+        });
+    }
+    static isUserExist(account) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield mongoInst_1.default.roloUsers.findOne({ account });
+            return result;
+        });
     }
 }
 exports.default = AuthModel;

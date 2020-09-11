@@ -8,18 +8,19 @@ import Backend from "../modules/backend";
 
 export default class AuthModel{
 
-    public static async register(account:string, secreat?:string):Promise<Backend.Response.Status>{
+    public static async register(account:string, pw:string, secreat?:string):Promise<Backend.Response.Status>{
         try{
-            const bValidation = this.validateEmail(account);
-            if(!bValidation)  return Backend.Response.Status.Verify;
-
-            const user:MongoConfig.Scheme.UserCollect = {
-                account,
-                pw:"",
-                joinT :Date.now().exFloorTimeToSec().toString()
+            const isAllow = await this.validateRegist(account);
+            if(isAllow) {
+                const user:MongoConfig.Scheme.UserCollect = {
+                    account,
+                    pw, // TODO pw保密(這邊是Client傳進來的,會是Salt？還是只是加密過，server要自己處理？)
+                    joinT :Date.now().exFloorTimeToSec().toString()
+                }
+                MongoInst.roloUsers.insertOne(user);
+                return Backend.Response.Status.Success;
             }
-            await MongoInst.roloUsers.insertOne(user);
-            return Backend.Response.Status.Success;
+            return Backend.Response.Status.Verify;
         }catch(err){
             return Backend.Response.Status.DBError;
         }
@@ -30,5 +31,17 @@ export default class AuthModel{
         return re.test(String(email).toLowerCase());
     }
 
+    private static async validateRegist(account:string):Promise<boolean>{
+        const bValidation = this.validateEmail(account);
+        if(bValidation){
+           return !(await this.isUserExist(account));
+        }
+        return false;
+    }
+
+    private static async isUserExist(account:string):Promise<boolean>{
+        const result = await MongoInst.roloUsers.findOne({account});
+        return (result as unknown as boolean);
+    }
 
 }

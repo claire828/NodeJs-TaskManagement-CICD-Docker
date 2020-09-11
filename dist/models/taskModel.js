@@ -18,6 +18,7 @@ const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 require("../extensions/numberExtension");
 require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
+// TODO 感覺這個可以新增一個Class作為CacheServer
 class TaskModel {
     // [API-getAllTask] 從cache server中取得，如果不存在就從mongo取出
     static getTasksFromCacheServer(account) {

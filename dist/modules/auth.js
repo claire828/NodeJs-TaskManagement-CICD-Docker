@@ -8,46 +8,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const crypto_1 = __importDefault(require("crypto"));
-const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
+const token_1 = require("./token");
 // tslint:disable-next-line: no-namespace
 var Auth;
 (function (Auth) {
+    const TOKEN_VALIDITY = 600;
     function isTokenLegal(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            // TODO HMAC解密實作
-            // crypto.timingSafeEqual（a，b）
+            const infoToken = token_1.LoginToken.decode(token);
+            console.log(`decodeToken:${JSON.stringify(infoToken)}`);
+            const validTime = (TOKEN_VALIDITY + Date.now().exFloorTimeToSec());
+            if (!infoToken || !infoToken.account || !infoToken.expire || infoToken.expire > validTime) {
+                return false;
+            }
             return true;
         });
     }
     Auth.isTokenLegal = isTokenLegal;
-    function generateToken(user) {
-        const secret = 'abcdefg';
-        const hash = crypto_1.default.createHmac('sha256', secret)
-            .update('I love cupcakes')
-            .digest('hex');
-        return {
-            hash
-        };
+    function generateToken(account) {
+        const time = Date.now().exFloorTimeToSec();
+        const token = token_1.LoginToken.encode({
+            account,
+            t: time,
+            expire: time + TOKEN_VALIDITY
+        });
+        return token;
     }
     Auth.generateToken = generateToken;
-    function isUserExist(account) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = yield mongoInst_1.default.roloUsers.findOne({ account });
-            return result;
-        });
-    }
-    Auth.isUserExist = isUserExist;
-    function isRegistLegal(account) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return !(yield Auth.isUserExist(account));
-        });
-    }
-    Auth.isRegistLegal = isRegistLegal;
 })(Auth || (Auth = {}));
 exports.default = Auth;
 //# sourceMappingURL=auth.js.map

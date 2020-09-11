@@ -33,7 +33,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __importStar(require("underscore"));
 const backend_1 = __importDefault(require("./backend"));
-const auth_1 = __importDefault(require("./auth"));
+const token_1 = require("./token");
 // tslint:disable-next-line: no-namespace
 var Middleware;
 (function (Middleware) {
@@ -62,10 +62,6 @@ var Middleware;
         next();
     }
     Middleware.addCorsHeader = addCorsHeader;
-    function errorHandler(err, msg) {
-        return `Error Type:${backend_1.default.Response.Status}, msg:${msg}`;
-    }
-    Middleware.errorHandler = errorHandler;
     function unknownRoute(req, res, next) {
         return res.status(403).end();
     }
@@ -73,45 +69,20 @@ var Middleware;
     function verifyToken(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const bLegle = yield auth_1.default.isTokenLegal(req.body.token);
-                if (!bLegle)
-                    return backend_1.default.Response.verifyError(res);
-                next();
+                const toekn = req.body.token;
+                if (!_.isEmpty(toekn) && _.isString(toekn)) {
+                    const bLegle = yield token_1.LoginToken.isTokenLegal(req.body.token);
+                    if (bLegle)
+                        return next();
+                }
+                backend_1.default.Response.verifyError(res);
             }
             catch (err) {
-                return this.errorHandler(backend_1.default.Response.Status.FailureExecuting, 400);
+                return backend_1.default.Response.verifyError(res);
             }
         });
     }
     Middleware.verifyToken = verifyToken;
-    function verifyEmptyMember(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const bLegle = yield auth_1.default.isRegistLegal(req.body.account);
-                if (!bLegle)
-                    return backend_1.default.Response.verifyError(res);
-                next();
-            }
-            catch (err) {
-                return this.errorHandler(backend_1.default.Response.Status.FailureExecuting, 400);
-            }
-        });
-    }
-    Middleware.verifyEmptyMember = verifyEmptyMember;
-    function verifyAuthEntre(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const bLegle = yield auth_1.default.isUserExist(req.body.account);
-                if (!bLegle)
-                    return backend_1.default.Response.verifyError(res);
-                next();
-            }
-            catch (err) {
-                return this.errorHandler(backend_1.default.Response.Status.FailureExecuting, 400);
-            }
-        });
-    }
-    Middleware.verifyAuthEntre = verifyAuthEntre;
 })(Middleware || (Middleware = {}));
 exports.default = Middleware;
 //# sourceMappingURL=middleware.js.map

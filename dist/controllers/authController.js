@@ -13,20 +13,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const backend_1 = __importDefault(require("../modules/backend"));
-const auth_1 = __importDefault(require("../modules/auth"));
 const authModel_1 = __importDefault(require("../models/authModel"));
+const underscore_1 = __importDefault(require("underscore"));
+const token_1 = require("../modules/token");
 class AuthController {
     responseError(res, err, msg) {
-        console.log(err instanceof Error ? err.stack : err);
         return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 401);
     }
     register(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const status = yield authModel_1.default.register(req.body.account);
-                if (status === backend_1.default.Response.Status.Success) {
-                    const token = auth_1.default.generateToken(req.body.account);
-                    return backend_1.default.Response.success(res, token);
+                const account = req.body.account;
+                const pw = req.body.pw;
+                let status = backend_1.default.Response.Status.InsufficientParameters;
+                if (!underscore_1.default.isEmpty(account) && underscore_1.default.isString(account) && !underscore_1.default.isEmpty(pw) && underscore_1.default.isString(pw)) {
+                    status = yield authModel_1.default.register(account, pw);
+                    if (status === backend_1.default.Response.Status.Success) {
+                        return backend_1.default.Response.success(res, {});
+                    }
                 }
                 return backend_1.default.Response.error(res, 1, "", status);
             }
@@ -38,8 +42,9 @@ class AuthController {
     logIn(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const token = auth_1.default.generateToken(req.body.account);
-                backend_1.default.Response.success(res, token);
+                // TODO 使用帳密登入 或 TOKEN
+                const token = token_1.LoginToken.generateToken(req.body.account);
+                backend_1.default.Response.success(res, { token });
             }
             catch (err) {
                 return this.responseError(res, err);
