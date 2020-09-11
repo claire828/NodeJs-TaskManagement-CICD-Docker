@@ -1,0 +1,1 @@
+{"version":3,"file":"taskToJson.js","sourceRoot":"","sources":["../../src/configs/taskToJson.ts"],"names":[],"mappings":";;;;;AAAA,8DAAsC;AAEtC,MAAqB,YAAY;IAE7B,8BAA8B;IAEvB,uBAAuB,CAAC,IAAoB,EAAE,GAAU;QAC3D,OAAO;YACH,KAAK,EAAC,IAAI,CAAC,KAAK;YAChB,OAAO,EAAC,IAAI,CAAC,OAAO;YACpB,GAAG;YACH,MAAM,EAAC,oBAAU,CAAC,MAAM,CAAC,IAAI;SAChC,CAAA;IACL,CAAC;CAEJ;AAbD,+BAaC"}

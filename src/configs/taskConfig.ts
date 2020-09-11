@@ -5,12 +5,12 @@ namespace TaskConfig{
         Draf,
         Conform
     }
-    export type Basic = {
+    export type Draf = {
         title:string,
         content:string,
     }
 
-    export type Task = Basic & {
+    export type Task = Draf & {
         tId:string,
         status:Status,
         t?:Time,
@@ -20,7 +20,6 @@ namespace TaskConfig{
         st:string | number,
         et?:string | number,
     }
-
 
 }
 export default TaskConfig;

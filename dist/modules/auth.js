@@ -20,6 +20,7 @@ var Auth;
     function isTokenLegal(token) {
         return __awaiter(this, void 0, void 0, function* () {
             // TODO HMAC解密實作
+            // crypto.timingSafeEqual（a，b）
             return true;
         });
     }

@@ -11,6 +11,13 @@ namespace Middleware {
         next();
     }
 
+    export function noCahce(req: express.Request, res: express.Response, next: express.NextFunction): void {
+        res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+        res.header('Expires', '-1');
+        res.header('Pragma', 'no-cache');
+        next();
+    }
+
     export function verifyPostBody(req: express.Request, res: express.Response, next: express.NextFunction) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
             return Backend.Response.error(res, Backend.Response.Status.InsufficientParameters, 'Empty POST',201);

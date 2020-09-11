@@ -31,6 +31,7 @@ export default class App{
   }
 
   private applyMiddlewares(){
+    this.app.use(Middleware.noCahce);
     this.app.use(BodyParse.json());
     this.app.use(BodyParse.urlencoded({extended:true}));
     this.app.use(CookieParse());

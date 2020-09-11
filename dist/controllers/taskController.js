@@ -14,12 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TaskStatus = void 0;
 const backend_1 = __importDefault(require("../modules/backend"));
-const tedisInst_1 = __importDefault(require("../instances/tedisInst"));
-const TaskConfig_1 = __importDefault(require("../configs/TaskConfig"));
-const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 require("../extensions/numberExtension");
 require("../extensions/dateExtension");
 require("../extensions/arrayExtension");
+const taskModel_1 = __importDefault(require("../models/taskModel"));
 var TaskStatus;
 (function (TaskStatus) {
     TaskStatus[TaskStatus["Draf"] = 0] = "Draf";
@@ -27,9 +25,6 @@ var TaskStatus;
     TaskStatus[TaskStatus["Expired"] = 2] = "Expired";
 })(TaskStatus = exports.TaskStatus || (exports.TaskStatus = {}));
 class TaskController {
-    constructor() {
-        this.ExpiredHours = 24;
-    }
     unknowErrorHandler(res, err, msg) {
         console.log(err instanceof Error ? err.stack : err);
         return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 401);
@@ -42,23 +37,9 @@ class TaskController {
     getTasks(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Step2 (skip）先看CacheServer有沒有資料
-                // Step3 (skip)CacheServer沒有資料，就抓MongoDB的回存 （skip 4)
                 const account = req.body.account;
-                const target = yield mongoInst_1.default.roloTasks.findOne({ account });
-                for (const tId of target.drafs) {
-                    const task = yield tedisInst_1.default.get().get(tId);
-                    if (task) {
-                        const valueJson = JSON.parse(task.toString());
-                        target.tasks.push({
-                            title: valueJson.title,
-                            content: valueJson.content,
-                            tId,
-                            status: TaskConfig_1.default.Status.Draf
-                        });
-                    }
-                }
-                backend_1.default.Response.success(res, target.tasks);
+                const allTasks = yield taskModel_1.default.getTasksFromCacheServer(account);
+                backend_1.default.Response.success(res, allTasks);
             }
             catch (err) {
                 return this.unknowErrorHandler(res, err);
@@ -73,16 +54,16 @@ class TaskController {
     addTask(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // TODO 目前是假資料，補上正式的
-                const account = req.body.account;
-                const taskID = this.generateTaskID(account);
-                const tasks = {
+                const task = {
                     title: "",
                     content: "",
                 };
-                yield tedisInst_1.default.get().setex(taskID, this.ExpiredHours.exHoursInSec(), JSON.stringify(tasks));
-                yield mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { drafs: taskID } }, { upsert: true });
-                return backend_1.default.Response.success(res, {});
+                const account = req.body.account;
+                const bSuccess = yield taskModel_1.default.addDrafToServer(account, task);
+                if (bSuccess) {
+                    return backend_1.default.Response.success(res, {});
+                }
+                return backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 201);
             }
             catch (err) {
                 // TODO 資料要補寫到System的Log中
@@ -100,29 +81,13 @@ class TaskController {
             try {
                 const account = req.body.account;
                 const tId = req.body.tid;
-                const value = yield tedisInst_1.default.get().get(tId);
-                yield tedisInst_1.default.get().del(tId);
-                const valueJson = JSON.parse(value.toString());
-                const task = {
-                    title: valueJson.title,
-                    content: valueJson.content,
-                    tId,
-                    status: TaskConfig_1.default.Status.Conform,
-                    t: {
-                        st: Date.now().exFloorTimeToSec().toString()
-                    }
-                };
-                yield mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { tasks: task }, $pull: { drafs: tId } }, { upsert: true });
-                // TODO Step5 更新到Cache Server (刪除cache)
+                yield taskModel_1.default.conformDrafToTask(account, tId);
                 return backend_1.default.Response.success(res, {});
             }
             catch (err) {
                 return this.unknowErrorHandler(res, err);
             }
         });
-    }
-    generateTaskID(account) {
-        return `${account}${Date.now().exFloorTimeToSec()}`;
     }
 }
 exports.default = TaskController;

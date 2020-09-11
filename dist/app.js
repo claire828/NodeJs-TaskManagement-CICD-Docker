@@ -40,6 +40,7 @@ class App {
         });
     }
     applyMiddlewares() {
+        this.app.use(middleware_1.default.noCahce);
         this.app.use(body_parser_1.default.json());
         this.app.use(body_parser_1.default.urlencoded({ extended: true }));
         this.app.use(cookie_parser_1.default());

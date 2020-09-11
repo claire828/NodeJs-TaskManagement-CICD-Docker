@@ -42,6 +42,13 @@ var Middleware;
         next();
     }
     Middleware.log = log;
+    function noCahce(req, res, next) {
+        res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+        res.header('Expires', '-1');
+        res.header('Pragma', 'no-cache');
+        next();
+    }
+    Middleware.noCahce = noCahce;
     function verifyPostBody(req, res, next) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
             return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, 'Empty POST', 201);

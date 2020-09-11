@@ -7,6 +7,9 @@ import MongoInst from '../instances/mongoInst';
 namespace Auth{
     export async function isTokenLegal(token:string):Promise<boolean>{
         // TODO HMAC解密實作
+        // crypto.timingSafeEqual（a，b）
+
+
         return true;
     }
 
