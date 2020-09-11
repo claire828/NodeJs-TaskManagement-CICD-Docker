@@ -13,9 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const backend_1 = __importDefault(require("../modules/backend"));
-const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 const auth_1 = __importDefault(require("../modules/auth"));
-// TODO Request的Account還沒加入 & 密碼也要加上
+const authModel_1 = __importDefault(require("../models/authModel"));
 class AuthController {
     responseError(res, err, msg) {
         console.log(err instanceof Error ? err.stack : err);
@@ -24,14 +23,12 @@ class AuthController {
     register(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = {
-                    account: req.body.account,
-                    pw: "",
-                    joinT: Date.now().exFloorTimeToSec().toString()
-                };
-                yield mongoInst_1.default.roloUsers.insertOne(user);
-                const token = auth_1.default.generateToken(user.account);
-                backend_1.default.Response.success(res, token);
+                const status = yield authModel_1.default.register(req.body.account);
+                if (status === backend_1.default.Response.Status.Success) {
+                    const token = auth_1.default.generateToken(req.body.account);
+                    return backend_1.default.Response.success(res, token);
+                }
+                return backend_1.default.Response.error(res, 1, "", status);
             }
             catch (err) {
                 return this.responseError(res, err);
