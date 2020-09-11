@@ -24,7 +24,7 @@ class TaskModel {
     // [API-getAllTask] 從cache server中取得，如果不存在就從mongo取出
     static getTasks(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            let tasks = yield cacheModel_1.default.getTasksFromCacheServer(account);
+            let tasks = yield cacheModel_1.default.getTasks(account);
             if (tasks)
                 return tasks;
             console.log("do:CACHE server找不到資料，去MONGO拿");
@@ -38,10 +38,10 @@ class TaskModel {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield Promise.all([
-                    tedisInst_1.default.get().setex(tId, this.DrafExpiredSec, JSON.stringify(draf)),
+                    tedisInst_1.default.get().setex(tId, this.ExpiredSec, JSON.stringify(draf)),
                     mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { drafs: tId } }, { upsert: true })
                 ]);
-                cacheModel_1.default.addTaskToCacheList(account, draf, tId);
+                cacheModel_1.default.addTask(account, draf, tId);
                 return true;
             }
             catch (err) {
@@ -49,24 +49,22 @@ class TaskModel {
             }
         });
     }
-    static conformDrafToTask(account, tId) {
+    static conformDrafToTask(account, tId, task) {
         return __awaiter(this, void 0, void 0, function* () {
             const value = yield this.getTask(tId);
             if (!value)
                 return false;
             yield tedisInst_1.default.get().del(tId);
             const draf = value.exToObj();
-            const task = {
+            task = {
                 title: draf.title,
                 content: draf.content,
                 tId,
                 status: TaskConfig_1.default.Status.Conform,
-                t: {
-                    st: Date.now().exFloorTimeToSec().toString()
-                }
+                t: { st: Date.now().exFloorTimeToSec().toString() }
             };
             yield mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { tasks: task }, $pull: { drafs: tId } }, { upsert: true });
-            cacheModel_1.default.ConformTaskToCacheList(account, tId, task);
+            cacheModel_1.default.conformDrafToTask(account, tId, task);
             return true;
         });
     }
@@ -102,5 +100,5 @@ class TaskModel {
     }
 }
 exports.default = TaskModel;
-TaskModel.DrafExpiredSec = (24).exHoursInSec();
+TaskModel.ExpiredSec = (24).exHoursInSec();
 //# sourceMappingURL=taskModel.js.map

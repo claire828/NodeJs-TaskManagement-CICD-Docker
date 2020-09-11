@@ -18,7 +18,7 @@ require("../extensions/numberExtension");
 require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
 class CacheModel {
-    static getTasksFromCacheServer(account) {
+    static getTasks(account) {
         return __awaiter(this, void 0, void 0, function* () {
             const strTasks = yield this.getTask(account);
             if (strTasks)
@@ -28,23 +28,10 @@ class CacheModel {
     }
     // 儲存整筆Task的快取
     static SaveTasksToCache(account, allTasks) {
-        tedisInst_1.default.get().setex(account, this.CachedExpiredSec, JSON.stringify(allTasks));
-    }
-    // conform DrafToTask
-    static ConformTaskToCacheList(account, tId, task) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cacheList = yield this.getTaskList(account);
-            if (cacheList) {
-                const inx = cacheList.findIndex(x => x.tId === tId);
-                if (inx === -1)
-                    return;
-                cacheList[inx] = task;
-                this.SaveTasksToCache(account, cacheList);
-            }
-        });
+        tedisInst_1.default.get().setex(account, this.ExpiredSec, JSON.stringify(allTasks));
     }
     // add task (draf)
-    static addTaskToCacheList(account, draf, tId) {
+    static addTask(account, draf, tId) {
         return __awaiter(this, void 0, void 0, function* () {
             const cacheList = yield this.getTaskList(account);
             if (cacheList) {
@@ -58,6 +45,20 @@ class CacheModel {
             }
         });
     }
+    // conform DrafToTask
+    static conformDrafToTask(account, tId, task) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cacheList = yield this.getTaskList(account);
+            if (cacheList) {
+                const inx = cacheList.findIndex(x => x.tId === tId);
+                if (inx === -1)
+                    return;
+                cacheList[inx] = task;
+                this.SaveTasksToCache(account, cacheList);
+            }
+        });
+    }
+    //TODO 這邊可以用<T>來做
     static getTaskList(account) {
         return __awaiter(this, void 0, void 0, function* () {
             const oldCache = yield this.getTask(account);
@@ -72,5 +73,5 @@ class CacheModel {
     }
 }
 exports.default = CacheModel;
-CacheModel.CachedExpiredSec = (4).exHoursInSec();
+CacheModel.ExpiredSec = (4).exHoursInSec();
 //# sourceMappingURL=cacheModel.js.map

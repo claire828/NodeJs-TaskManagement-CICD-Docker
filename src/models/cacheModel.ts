@@ -7,9 +7,9 @@ import TaskModel from "./taskModel";
 
 export default class CacheModel{
 
-    private static readonly CachedExpiredSec = (4).exHoursInSec();
+    private static readonly ExpiredSec = (4).exHoursInSec();
 
-    public static async getTasksFromCacheServer(account:string):Promise<TaskConfig.Task[]>{
+    public static async getTasks(account:string):Promise<TaskConfig.Task[]>{
         const strTasks = await this.getTask(account);
         if(strTasks) return strTasks.exToObj() as TaskConfig.Task[];
         return null;
@@ -17,23 +17,11 @@ export default class CacheModel{
 
      // 儲存整筆Task的快取
     public static SaveTasksToCache(account:string, allTasks:TaskConfig.Task[] ){
-        TedisInst.get().setex(account,this.CachedExpiredSec , JSON.stringify(allTasks));
+        TedisInst.get().setex(account,this.ExpiredSec , JSON.stringify(allTasks));
     }
-
-    // conform DrafToTask
-    public static async ConformTaskToCacheList( account:string, tId:string, task:TaskConfig.Task ){
-        const cacheList = await this.getTaskList(account)
-        if(cacheList){
-            const inx = cacheList.findIndex( x=> x.tId === tId);
-            if(inx === -1) return;
-            cacheList[inx] = task;
-            this.SaveTasksToCache(account,cacheList);
-        }
-    }
-
 
     // add task (draf)
-    public static async addTaskToCacheList(account:string, draf:TaskConfig.Draf, tId:string){
+    public static async addTask(account:string, draf:TaskConfig.Draf, tId:string){
         const cacheList = await this.getTaskList(account)
         if(cacheList){
             cacheList.push({
@@ -46,7 +34,18 @@ export default class CacheModel{
         }
     }
 
+    // conform DrafToTask
+    public static async conformDrafToTask( account:string, tId:string, task:TaskConfig.Task ){
+        const cacheList = await this.getTaskList(account)
+        if(cacheList){
+            const inx = cacheList.findIndex( x=> x.tId === tId);
+            if(inx === -1) return;
+            cacheList[inx] = task;
+            this.SaveTasksToCache(account,cacheList);
+        }
+    }
 
+    //TODO 這邊可以用<T>來做
     public static async getTaskList(account:string):Promise<TaskConfig.Task[]>{
         const oldCache = await this.getTask(account);
         return oldCache ? (oldCache.exToObj() as TaskConfig.Task[]) : null;

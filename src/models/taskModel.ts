@@ -8,11 +8,11 @@ import CacheModel from "./cacheModel";
 
 // TODO 感覺這個可以新增一個Class作為CacheServer
 export default class TaskModel{
-    private static readonly DrafExpiredSec = (24).exHoursInSec();
+    private static readonly ExpiredSec = (24).exHoursInSec();
 
     // [API-getAllTask] 從cache server中取得，如果不存在就從mongo取出
     public static async getTasks(account:string):Promise<TaskConfig.Task[]>{
-        let tasks = await CacheModel.getTasksFromCacheServer(account);
+        let tasks = await CacheModel.getTasks(account);
         if(tasks) return tasks;
         console.log("do:CACHE server找不到資料，去MONGO拿");
         tasks = await this.retrieveFromServer(account);
@@ -24,35 +24,32 @@ export default class TaskModel{
     // 儲存草稿到Mongo&Redis
     public static async addTask(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>{
         try{
-
             await Promise.all([
-                TedisInst.get().setex(tId, this.DrafExpiredSec, JSON.stringify(draf)),
+                TedisInst.get().setex(tId, this.ExpiredSec, JSON.stringify(draf)),
                 MongoInst.roloTasks.updateOne({account},{$addToSet:{drafs:tId}},{upsert:true})
             ]);
-            CacheModel.addTaskToCacheList(account, draf, tId);
+            CacheModel.addTask(account, draf, tId);
             return true;
         }catch(err){
             return false;
         }
     }
 
-    public static async conformDrafToTask(account:string, tId:string):Promise<boolean>{
+    public static async conformDrafToTask(account:string, tId:string , task?:TaskConfig.Task):Promise<boolean>{
         const value = await this.getTask(tId);
         if(!value) return false;
         await TedisInst.get().del(tId);
         const draf = value.exToObj() as TaskConfig.Draf;
-        const task = {
+        task = {
             title: draf.title,
             content: draf.content,
             tId,
             status:TaskConfig.Status.Conform,
-            t:{
-                st:Date.now().exFloorTimeToSec().toString()
-            }
+            t:{st:Date.now().exFloorTimeToSec().toString()}
         };
 
         await MongoInst.roloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
-        CacheModel.ConformTaskToCacheList(account, tId , task);
+        CacheModel.conformDrafToTask(account, tId , task);
         return true;
     }
 
