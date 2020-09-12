@@ -17,11 +17,9 @@ export namespace Req{
         Object: (x: object) => _.isObject(x),
     }
 
-
     export function parseParam< K extends keyof typeof ParseParamType,
                                 T extends SKeyValue<typeof ParseParamType[K]> >
-    (req: express.Request, paramObj: T): { [P in keyof T]: ParamType<T[P]> } | false
-    {
+    (req: express.Request, paramObj: T): { [P in keyof T]: ParamType<T[P]> } | false {
         const ret: any = {};
         if (!_.isObject(paramObj)) {
             return false;

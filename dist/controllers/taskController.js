@@ -39,10 +39,10 @@ class TaskController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const account = req.body.account;
-                let allTasks = yield this.CacheDbs.cacheDb.getTasks(account);
+                let allTasks = yield this.CacheDbs.cacheDb.getAll(account);
                 if (!allTasks) {
-                    allTasks = yield this.CacheDbs.taskDb.getTasks(account);
-                    this.CacheDbs.cacheDb.saveTasks(account, allTasks);
+                    allTasks = yield this.CacheDbs.taskDb.getAll(account);
+                    this.CacheDbs.cacheDb.saveAll(account, allTasks);
                 }
                 backend_1.default.success(res, allTasks);
             }
@@ -58,16 +58,16 @@ class TaskController {
      */
     addTask(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const draf = {
+                title: req.body.title,
+                content: req.body.content
+            };
+            const account = req.body.account;
+            const tId = this.CacheDbs.taskDb.generateTaskID(account);
             try {
-                const draf = {
-                    title: req.body.title,
-                    content: req.body.content
-                };
-                const account = req.body.account;
-                const tId = this.CacheDbs.taskDb.generateTaskID(account);
-                const bSuccess = yield this.CacheDbs.taskDb.addTask(account, draf, tId);
+                const bSuccess = yield this.CacheDbs.taskDb.add(account, draf, tId);
                 if (bSuccess) {
-                    this.CacheDbs.cacheDb.addTask(account, draf, tId);
+                    this.CacheDbs.cacheDb.add(account, draf, tId);
                     return backend_1.default.success(res, {});
                 }
                 return backend_1.default.error(res, backend_1.default.Status.DBError, "", 201);
@@ -87,9 +87,9 @@ class TaskController {
             try {
                 const account = req.body.account;
                 const tId = req.body.tid;
-                const task = yield this.CacheDbs.taskDb.conformTask(account, tId);
+                const task = yield this.CacheDbs.taskDb.conform(account, tId);
                 if (task) {
-                    this.CacheDbs.cacheDb.conformTask(account, tId, task);
+                    this.CacheDbs.cacheDb.conform(account, tId, task);
                     return backend_1.default.success(res, {});
                 }
                 return backend_1.default.error(res, backend_1.default.Status.DBError, "", 400);

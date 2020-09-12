@@ -21,7 +21,7 @@ namespace Middleware {
 
     export function verifyPostBody(req: express.Request, res: express.Response, next: express.NextFunction) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            return Response.error(res, Response.Status.InsufficientParameters, 'Empty POST',201);
+            return Response.error(res, Response.Status.InsufficientParams, 'Empty POST',201);
         }
         next();
     }

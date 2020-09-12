@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tedisInst_1 = __importDefault(require("../instances/tedisInst"));
 class DbModel {
     get db() { return tedisInst_1.default.get(); }
-    retrieveTask(key) {
+    retrieveByKey(key) {
         return __awaiter(this, void 0, void 0, function* () {
             const oldCache = yield this.db.get(key);
             return (oldCache === null || oldCache === void 0 ? void 0 : oldCache.toString()) || null;

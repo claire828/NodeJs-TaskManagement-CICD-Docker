@@ -24,17 +24,17 @@ class TaskModel extends dbModel_1.default {
         super(...arguments);
         this.ExpiredSec = (24).exHoursInSec();
     }
-    getTasks(account) {
+    getAll(account) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.retrieveFromServer(account);
         });
     }
-    saveTasks(account, allTasks) {
+    saveAll(account, allTasks) {
         return __awaiter(this, void 0, void 0, function* () {
             return;
         });
     }
-    addTask(account, draf, tId) {
+    add(account, draf, tId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield Promise.all([
@@ -48,10 +48,10 @@ class TaskModel extends dbModel_1.default {
             }
         });
     }
-    conformTask(account, tId, task) {
+    conform(account, tId, task) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            const value = yield this.retrieveTask(tId);
+            const value = yield this.retrieveByKey(tId);
             if (!value)
                 return null;
             yield tedisInst_1.default.get().del(tId);
@@ -73,7 +73,7 @@ class TaskModel extends dbModel_1.default {
             const target = yield mongoInst_1.default.roloTasks.findOne({ account });
             const list = (_a = target.tasks) !== null && _a !== void 0 ? _a : [];
             for (const tId of target.drafs) {
-                const task = yield this.retrieveTask(tId);
+                const task = yield this.retrieveByKey(tId);
                 if (!task)
                     continue;
                 const draf = task.exToObj();

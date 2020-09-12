@@ -51,7 +51,7 @@ var Middleware;
     Middleware.noCahce = noCahce;
     function verifyPostBody(req, res, next) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            return backend_1.default.error(res, backend_1.default.Status.InsufficientParameters, 'Empty POST', 201);
+            return backend_1.default.error(res, backend_1.default.Status.InsufficientParams, 'Empty POST', 201);
         }
         next();
     }

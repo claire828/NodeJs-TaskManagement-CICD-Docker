@@ -37,10 +37,10 @@ export default class TaskController {
     public async getTasks(req:express.Request, res:express.Response):Promise<void>{
         try{
             const account:string = req.body.account;
-            let allTasks = await this.CacheDbs.cacheDb.getTasks(account);
+            let allTasks = await this.CacheDbs.cacheDb.getAll(account);
             if(!allTasks){
-                allTasks = await this.CacheDbs.taskDb.getTasks(account);
-                this.CacheDbs.cacheDb.saveTasks(account,allTasks);
+                allTasks = await this.CacheDbs.taskDb.getAll(account);
+                this.CacheDbs.cacheDb.saveAll(account,allTasks);
             }
             Response.success(res,allTasks);
         }catch(err){
@@ -54,16 +54,16 @@ export default class TaskController {
      * @param res out
      */
     public async addTask(req:express.Request, res:express.Response):Promise<void>{
+        const draf:TaskConfig.Draf = {
+            title: req.body.title,
+            content: req.body.content
+        }
+        const account:string = req.body.account;
+        const tId:string = this.CacheDbs.taskDb.generateTaskID(account);
         try{
-            const draf:TaskConfig.Draf = {
-                title: req.body.title,
-                content: req.body.content
-            }
-            const account:string = req.body.account;
-            const tId:string = this.CacheDbs.taskDb.generateTaskID(account);
-            const bSuccess = await this.CacheDbs.taskDb.addTask(account,draf,tId);
+            const bSuccess = await this.CacheDbs.taskDb.add(account,draf,tId);
             if(bSuccess){
-                this.CacheDbs.cacheDb.addTask(account,draf,tId);
+                this.CacheDbs.cacheDb.add(account,draf,tId);
                 return Response.success(res,{});
             }
             return Response.error(res,Response.Status.DBError,"",201);
@@ -82,9 +82,9 @@ export default class TaskController {
         try{
             const account:string = req.body.account;
             const tId:string = req.body.tid;
-            const task = await this.CacheDbs.taskDb.conformTask(account,tId);
+            const task = await this.CacheDbs.taskDb.conform(account,tId);
             if(task){
-                this.CacheDbs.cacheDb.conformTask(account,tId,task);
+                this.CacheDbs.cacheDb.conform(account,tId,task);
                 return Response.success(res,{})
             }
             return Response.error(res,Response.Status.DBError,"",400);

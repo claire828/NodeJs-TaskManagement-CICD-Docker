@@ -22,22 +22,22 @@ class CacheModel extends dbModel_1.default {
         super(...arguments);
         this.ExpiredSec = (4).exHoursInSec();
     }
-    getTasks(account) {
+    getAll(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            const strTasks = yield this.retrieveTask(account);
+            const strTasks = yield this.retrieveByKey(account);
             if (strTasks)
                 return strTasks.exToObj();
             return null;
         });
     }
     // 儲存整筆Task的快取
-    saveTasks(account, allTasks) {
+    saveAll(account, allTasks) {
         return __awaiter(this, void 0, void 0, function* () {
             this.db.setex(account, this.ExpiredSec, JSON.stringify(allTasks));
         });
     }
     // add task (draf)
-    addTask(account, draf, tId) {
+    add(account, draf, tId) {
         return __awaiter(this, void 0, void 0, function* () {
             const cacheList = yield this.retrieveTaskList(account);
             if (cacheList) {
@@ -47,13 +47,13 @@ class CacheModel extends dbModel_1.default {
                     tId,
                     status: TaskConfig_1.default.Status.Draf,
                 });
-                this.saveTasks(account, cacheList);
+                this.saveAll(account, cacheList);
             }
             return true;
         });
     }
     // conform DrafToTask
-    conformTask(account, tId, task) {
+    conform(account, tId, task) {
         return __awaiter(this, void 0, void 0, function* () {
             const cacheList = yield this.retrieveTaskList(account);
             if (cacheList) {
@@ -61,14 +61,14 @@ class CacheModel extends dbModel_1.default {
                 if (inx === -1)
                     return;
                 cacheList[inx] = task;
-                this.saveTasks(account, cacheList);
+                this.saveAll(account, cacheList);
             }
             return task;
         });
     }
     retrieveTaskList(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            const oldCache = yield this.retrieveTask(account);
+            const oldCache = yield this.retrieveByKey(account);
             return oldCache ? oldCache.exToObj() : null;
         });
     }
