@@ -18,17 +18,13 @@ require("../extensions/dateExtension");
 require("../extensions/arrayExtension");
 const taskModel_1 = __importDefault(require("../models/taskModel"));
 const cacheModel_1 = __importDefault(require("../models/cacheModel"));
+const req_1 = require("../modules/req");
 class TaskController {
     constructor() {
         this.CacheDbs = {
             taskDb: new taskModel_1.default(),
             cacheDb: new cacheModel_1.default()
         };
-    }
-    unknowErrorHandler(res, err, msg) {
-        // TODO 資料要補寫到System的Log中
-        console.log(`##CatchError##:${err instanceof Error ? err.stack : err}`);
-        return backend_1.default.error(res, backend_1.default.Status.FailureExecuting, msg, 400);
     }
     /**
      * [API EndPoint] Get All Tasks
@@ -37,17 +33,21 @@ class TaskController {
      */
     getTasks(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const param = req_1.Req.parsePostParam(req, {
+                account: req_1.Req.ParseParamType.String,
+            });
+            if (!param)
+                return backend_1.default.paramsError(res);
             try {
-                const account = req.body.account;
-                let allTasks = yield this.CacheDbs.cacheDb.getAll(account);
+                let allTasks = yield this.CacheDbs.cacheDb.getAll(param.account);
                 if (!allTasks) {
-                    allTasks = yield this.CacheDbs.taskDb.getAll(account);
-                    this.CacheDbs.cacheDb.saveAll(account, allTasks);
+                    allTasks = yield this.CacheDbs.taskDb.getAll(param.account);
+                    this.CacheDbs.cacheDb.saveAll(param.account, allTasks);
                 }
                 backend_1.default.success(res, allTasks);
             }
             catch (err) {
-                return this.unknowErrorHandler(res, err);
+                return backend_1.default.error(res, backend_1.default.Status.FailureExecuting, "", 400);
             }
         });
     }
@@ -58,23 +58,23 @@ class TaskController {
      */
     addTask(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const param = req_1.Req.parsePostParam(req, {
+                account: req_1.Req.ParseParamType.String,
+                title: req_1.Req.ParseParamType.String,
+                content: req_1.Req.ParseParamType.String
+            });
+            if (!param)
+                return backend_1.default.paramsError(res);
             const draf = {
-                title: req.body.title,
-                content: req.body.content
+                title: param.title,
+                content: param.content
             };
-            const account = req.body.account;
-            const tId = this.CacheDbs.taskDb.generateTaskID(account);
-            try {
-                const bSuccess = yield this.CacheDbs.taskDb.add(account, draf, tId);
-                if (bSuccess) {
-                    this.CacheDbs.cacheDb.add(account, draf, tId);
-                    return backend_1.default.success(res, {});
-                }
-                return backend_1.default.error(res, backend_1.default.Status.DBError, "", 201);
-            }
-            catch (err) {
-                return this.unknowErrorHandler(res, err);
-            }
+            const tId = this.CacheDbs.taskDb.generateTaskID(param.account);
+            const bSuccess = yield this.CacheDbs.taskDb.add(param.account, draf, tId);
+            if (!bSuccess)
+                return backend_1.default.error(res, backend_1.default.Status.DBError, "", 400);
+            this.CacheDbs.cacheDb.add(param.account, draf, tId);
+            return backend_1.default.success(res, {});
         });
     }
     /**
@@ -84,18 +84,22 @@ class TaskController {
      */
     conformTask(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            const param = req_1.Req.parsePostParam(req, {
+                account: req_1.Req.ParseParamType.String,
+                tId: req_1.Req.ParseParamType.String,
+            });
+            if (!param)
+                return backend_1.default.paramsError(res);
             try {
-                const account = req.body.account;
-                const tId = req.body.tid;
-                const task = yield this.CacheDbs.taskDb.conform(account, tId);
+                const task = yield this.CacheDbs.taskDb.conform(param.account, param.tId);
                 if (task) {
-                    this.CacheDbs.cacheDb.conform(account, tId, task);
+                    this.CacheDbs.cacheDb.conform(param.account, param.tId, task);
                     return backend_1.default.success(res, {});
                 }
-                return backend_1.default.error(res, backend_1.default.Status.DBError, "", 400);
+                return backend_1.default.paramsError(res);
             }
             catch (err) {
-                // return this.unknowErrorHandler(res,err);
+                return backend_1.default.error(res, backend_1.default.Status.DBError, "", 400);
             }
         });
     }

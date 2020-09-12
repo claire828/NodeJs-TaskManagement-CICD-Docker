@@ -14,23 +14,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const backend_1 = __importDefault(require("../modules/backend"));
 const authModel_1 = __importDefault(require("../models/authModel"));
-const underscore_1 = __importDefault(require("underscore"));
 const token_1 = require("../modules/token");
+const req_1 = require("../modules/req");
 class AuthController {
     register(req, res) {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            const param = this.mappingAuthParam(req);
+            if (!param)
+                return backend_1.default.paramsError(res);
             try {
-                const [account, pw] = [(_a = req.body) === null || _a === void 0 ? void 0 : _a.account, (_b = req.body) === null || _b === void 0 ? void 0 : _b.pw];
-                let status = backend_1.default.Status.InsufficientParams;
-                if (!underscore_1.default.isEmpty(account) && underscore_1.default.isString(account) && !underscore_1.default.isEmpty(pw) && underscore_1.default.isString(pw)) {
-                    status = yield authModel_1.default.registerUser(account, pw);
-                    if (status === backend_1.default.Status.Success) {
-                        return backend_1.default.success(res, {});
-                    }
-                    return backend_1.default.error(res, status, "Register Failed", 400);
+                const status = yield authModel_1.default.registerUser(param.account, param.pw);
+                if (status === backend_1.default.Status.Success) {
+                    return backend_1.default.success(res, {});
                 }
-                return backend_1.default.error(res, status, "InsufficientParams", 400);
+                return backend_1.default.error(res, status, "Register Failed", 400);
             }
             catch (err) {
                 console.log("ERRR");
@@ -38,22 +35,26 @@ class AuthController {
         });
     }
     logIn(req, res) {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            const param = this.mappingAuthParam(req);
+            if (!param)
+                return backend_1.default.paramsError(res);
             try {
-                const [account, pw] = [(_a = req.body) === null || _a === void 0 ? void 0 : _a.account, (_b = req.body) === null || _b === void 0 ? void 0 : _b.pw];
-                if (!underscore_1.default.isEmpty(account) && underscore_1.default.isString(account) && !underscore_1.default.isEmpty(pw) && underscore_1.default.isString(pw)) {
-                    if (yield authModel_1.default.isUserMath(account, pw)) {
-                        const token = token_1.LoginToken.generateToken(req.body.account);
-                        return backend_1.default.success(res, { token });
-                    }
-                    return backend_1.default.error(res, backend_1.default.Status.Verify, "login Failed", 400);
+                if (yield authModel_1.default.isUserMath(param.account, param.pw)) {
+                    const token = token_1.LoginToken.generateToken(req.body.account);
+                    return backend_1.default.success(res, { token });
                 }
-                return backend_1.default.error(res, backend_1.default.Status.InsufficientParams, "InsufficientParams", 400);
+                return backend_1.default.error(res, backend_1.default.Status.Verify, "login Failed", 400);
             }
             catch (err) {
                 console.log("ERRR");
             }
+        });
+    }
+    mappingAuthParam(req) {
+        return req_1.Req.parsePostParam(req, {
+            account: req_1.Req.ParseParamType.String,
+            pw: req_1.Req.ParseParamType.String
         });
     }
 }

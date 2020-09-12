@@ -35,6 +35,13 @@ namespace Response{
         res.status(htmlStatus).send(responseInfo).end();
     }
 
+    export function paramsError(res: express.Response,msg?:string): void {
+        console.log(`[Fail] paramsError`);
+        const responseInfo:ServerResponceContent = generateResponse(Status.InsufficientParams, msg)
+        res.status(400).send(responseInfo).end();
+    }
+
+
     export function success<T extends object>(res: express.Response, data: T): void {
         console.log(`[Success data:${JSON.stringify(data)}`);
         res.send(generateResponse(Status.Success, '',data));

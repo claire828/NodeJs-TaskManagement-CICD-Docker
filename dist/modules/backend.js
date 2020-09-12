@@ -27,6 +27,12 @@ var Response;
         res.status(htmlStatus).send(responseInfo).end();
     }
     Response.error = error;
+    function paramsError(res, msg) {
+        console.log(`[Fail] paramsError`);
+        const responseInfo = generateResponse(Status.InsufficientParams, msg);
+        res.status(400).send(responseInfo).end();
+    }
+    Response.paramsError = paramsError;
     function success(res, data) {
         console.log(`[Success data:${JSON.stringify(data)}`);
         res.send(generateResponse(Status.Success, '', data));

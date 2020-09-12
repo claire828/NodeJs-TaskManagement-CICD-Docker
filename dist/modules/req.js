@@ -14,7 +14,7 @@ var Req;
         Number: (x) => underscore_1.default.isNumber(x),
         Object: (x) => underscore_1.default.isObject(x),
     };
-    function parseParam(req, paramObj) {
+    function parsePostParam(req, paramObj) {
         const ret = {};
         if (!underscore_1.default.isObject(paramObj)) {
             return false;
@@ -31,6 +31,6 @@ var Req;
         }
         return ret;
     }
-    Req.parseParam = parseParam;
+    Req.parsePostParam = parsePostParam;
 })(Req = exports.Req || (exports.Req = {}));
 //# sourceMappingURL=req.js.map
