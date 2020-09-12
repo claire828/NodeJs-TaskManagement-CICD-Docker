@@ -61,7 +61,7 @@ jobs:
         # push it to ECR so that it can
         # be deployed to ECS.
         docker-compose build 
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:taskmanagerbackend_mongo:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:taskmanagerbackend_redis:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:taskmanagerbackend_node:latest
+        docker push $ECR_REGISTRY/taskmanagerbackend_mongo:latest
+        docker push $ECR_REGISTRY/taskmanagerbackend_redis:latest
+        docker push $ECR_REGISTRY/taskmanagerbackend_node:latest
         # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
