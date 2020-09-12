@@ -46,7 +46,7 @@ export class Token<T> {
 
 
     public generateToken(account:string){
-        const time = Date.now().exFloorTimeToSec();
+        const time = Date.now().exToSec();
         const token = LoginToken.encode({
             account,
             t: time,
@@ -59,7 +59,7 @@ export class Token<T> {
     public async isTokenLegal(token:string):Promise<boolean>{
         const infoToken = LoginToken.decode(token);
         console.log(`decodeToken:${JSON.stringify(infoToken)}`);
-        const validTime = (this.TokenValidateSec + Date.now().exFloorTimeToSec());
+        const validTime = (this.TokenValidateSec + Date.now().exToSec());
         if(!infoToken || !infoToken.account || !infoToken.expire || infoToken.expire > validTime){
             return false;
         }

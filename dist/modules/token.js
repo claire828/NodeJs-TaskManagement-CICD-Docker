@@ -67,7 +67,7 @@ class Token {
         return Crypto.createHmac('sha512', this.secret).update(data).digest(this.EncodeType);
     }
     generateToken(account) {
-        const time = Date.now().exFloorTimeToSec();
+        const time = Date.now().exToSec();
         const token = exports.LoginToken.encode({
             account,
             t: time,
@@ -79,7 +79,7 @@ class Token {
         return __awaiter(this, void 0, void 0, function* () {
             const infoToken = exports.LoginToken.decode(token);
             console.log(`decodeToken:${JSON.stringify(infoToken)}`);
-            const validTime = (this.TokenValidateSec + Date.now().exFloorTimeToSec());
+            const validTime = (this.TokenValidateSec + Date.now().exToSec());
             if (!infoToken || !infoToken.account || !infoToken.expire || infoToken.expire > validTime) {
                 return false;
             }

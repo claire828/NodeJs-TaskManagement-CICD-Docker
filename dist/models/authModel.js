@@ -30,7 +30,7 @@ class AuthModel {
                 const user = {
                     account,
                     pw: hashedPassword,
-                    joinT: Date.now().exFloorTimeToSec().toString()
+                    joinT: Date.now().exToSec().toString()
                 };
                 mongoInst_1.default.roloUsers.insertOne(user);
                 return backend_1.default.Response.Status.Success;

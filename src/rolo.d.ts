@@ -14,7 +14,7 @@ declare interface String{
 
 declare interface Number {
     exFloor():number
-    exFloorTimeToSec():number
+    exToSec():number
     exHoursInSec():number
 }
 

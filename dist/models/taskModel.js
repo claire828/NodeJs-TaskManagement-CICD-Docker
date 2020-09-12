@@ -18,30 +18,32 @@ const mongoInst_1 = __importDefault(require("../instances/mongoInst"));
 require("../extensions/numberExtension");
 require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
-const cacheModel_1 = __importDefault(require("./cacheModel"));
+const dbModel_1 = __importDefault(require("./dbModel"));
 // TODO 感覺這個可以新增一個Class作為CacheServer
-class TaskModel {
+class TaskModel extends dbModel_1.default {
+    constructor() {
+        super(...arguments);
+        this.ExpiredSec = (24).exHoursInSec();
+    }
     // [API-getAllTask] 從cache server中取得，如果不存在就從mongo取出
-    static getTasks(account) {
+    getTasks(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            let tasks = yield cacheModel_1.default.getTasks(account);
-            if (tasks)
-                return tasks;
-            console.log("do:CACHE server找不到資料，去MONGO拿");
-            tasks = yield this.retrieveFromServer(account);
-            cacheModel_1.default.SaveTasksToCache(account, tasks);
-            return tasks;
+            return yield this.retrieveFromServer(account);
+        });
+    }
+    saveTasks(account, allTasks) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return;
         });
     }
     // 儲存草稿到Mongo&Redis
-    static addTask(account, draf, tId) {
+    addTask(account, draf, tId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield Promise.all([
                     tedisInst_1.default.get().setex(tId, this.ExpiredSec, JSON.stringify(draf)),
                     mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { drafs: tId } }, { upsert: true })
                 ]);
-                cacheModel_1.default.addTask(account, draf, tId);
                 return true;
             }
             catch (err) {
@@ -49,33 +51,33 @@ class TaskModel {
             }
         });
     }
-    static conformDrafToTask(account, tId, task) {
+    conformTask(account, tId, task) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             const value = yield this.getTask(tId);
             if (!value)
-                return false;
+                return null;
             yield tedisInst_1.default.get().del(tId);
             const draf = value.exToObj();
             task = {
-                title: draf.title,
-                content: draf.content,
+                title: (_a = draf.title) !== null && _a !== void 0 ? _a : "",
+                content: (_b = draf.content) !== null && _b !== void 0 ? _b : "",
                 tId,
                 status: TaskConfig_1.default.Status.Conform,
-                t: { st: Date.now().exFloorTimeToSec().toString() }
+                t: { st: Date.now().exToSec().toString() }
             };
             yield mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { tasks: task }, $pull: { drafs: tId } }, { upsert: true });
-            cacheModel_1.default.conformDrafToTask(account, tId, task);
-            return true;
+            return task;
         });
     }
-    static getTask(key) {
+    getTask(key) {
         return __awaiter(this, void 0, void 0, function* () {
             const oldCache = yield tedisInst_1.default.get().get(key);
             return (oldCache === null || oldCache === void 0 ? void 0 : oldCache.toString()) || null;
         });
     }
     // 從正式ＤＢ中取得資料
-    static retrieveFromServer(account) {
+    retrieveFromServer(account) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const target = yield mongoInst_1.default.roloTasks.findOne({ account });
@@ -95,10 +97,6 @@ class TaskModel {
             return list;
         });
     }
-    static generateTaskID(account) {
-        return `${account}${Date.now().exFloorTimeToSec()}`;
-    }
 }
 exports.default = TaskModel;
-TaskModel.ExpiredSec = (24).exHoursInSec();
 //# sourceMappingURL=taskModel.js.map

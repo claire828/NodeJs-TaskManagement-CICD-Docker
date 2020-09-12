@@ -3,26 +3,27 @@ import TedisInst from "../instances/tedisInst";
 import '../extensions/numberExtension';
 import '../extensions/arrayExtension';
 import '../extensions/stringExtension';
-import TaskModel from "./taskModel";
+import { extend } from "underscore";
+import DbModel from "./dbModel";
 
-export default class CacheModel{
+export default class CacheModel extends DbModel {
 
-    private static readonly ExpiredSec = (4).exHoursInSec();
+    readonly ExpiredSec = (4).exHoursInSec();
 
-    public static async getTasks(account:string):Promise<TaskConfig.Task[]>{
-        const strTasks = await this.getTask(account);
+    public async getTasks(account:string):Promise<TaskConfig.Task[]>{
+        const strTasks = await this.retrieveTask(account);
         if(strTasks) return strTasks.exToObj() as TaskConfig.Task[];
         return null;
     }
 
      // 儲存整筆Task的快取
-    public static SaveTasksToCache(account:string, allTasks:TaskConfig.Task[] ){
-        TedisInst.get().setex(account,this.ExpiredSec , JSON.stringify(allTasks));
+    public async saveTasks(account:string, allTasks:TaskConfig.Task[] ){
+        this.db.setex(account,this.ExpiredSec , JSON.stringify(allTasks));
     }
 
     // add task (draf)
-    public static async addTask(account:string, draf:TaskConfig.Draf, tId:string){
-        const cacheList = await this.getTaskList(account)
+    public async addTask(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>{
+        const cacheList = await this.retrieveTaskList(account)
         if(cacheList){
             cacheList.push({
                 title:draf.title,
@@ -30,31 +31,29 @@ export default class CacheModel{
                 tId,
                 status:TaskConfig.Status.Draf,
             });
-            this.SaveTasksToCache(account,cacheList);
+            this.saveTasks(account,cacheList);
         }
+        return true;
     }
 
     // conform DrafToTask
-    public static async conformDrafToTask( account:string, tId:string, task:TaskConfig.Task ){
-        const cacheList = await this.getTaskList(account)
+    public async conformTask( account:string, tId:string, task:TaskConfig.Task ):Promise<TaskConfig.Task>{
+        const cacheList = await this.retrieveTaskList(account)
         if(cacheList){
             const inx = cacheList.findIndex( x=> x.tId === tId);
             if(inx === -1) return;
             cacheList[inx] = task;
-            this.SaveTasksToCache(account,cacheList);
+            this.saveTasks(account,cacheList);
         }
+        return task;
     }
 
-    //TODO 這邊可以用<T>來做
-    public static async getTaskList(account:string):Promise<TaskConfig.Task[]>{
-        const oldCache = await this.getTask(account);
+    // TODO 這邊可以用<T>來做
+    public async retrieveTaskList(account:string):Promise<TaskConfig.Task[]>{
+        const oldCache = await this.retrieveTask(account);
         return oldCache ? (oldCache.exToObj() as TaskConfig.Task[]) : null;
     }
 
 
-    private static async getTask(key:string):Promise<string>{
-        const oldCache = await TedisInst.get().get(key);
-        return oldCache?.toString() || null;
-    }
 
 }

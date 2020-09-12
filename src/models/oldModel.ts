@@ -49,7 +49,7 @@ export default class OldModel{
         await TedisInst.get().del(tId);
         const draf = value.exToObj() as TaskConfig.Draf;
         const mappingStruct = this.generateMappingStruct(draf,tId,TaskConfig.Status.Conform, {
-            st:Date.now().exFloorTimeToSec().toString()
+            st:Date.now().exToSec().toString()
         });
         const task = this.mappingDrafToTaskStruct(mappingStruct);
         await MongoInst.roloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
@@ -120,7 +120,7 @@ export default class OldModel{
         }
     }
     private static generateTaskID(account:string):string{
-        return `${account}${Date.now().exFloorTimeToSec()}`;
+        return `${account}${Date.now().exToSec()}`;
     }
 
 

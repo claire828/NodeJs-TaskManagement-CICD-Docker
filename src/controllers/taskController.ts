@@ -7,15 +7,23 @@ import '../extensions/numberExtension';
 import '../extensions/dateExtension';
 import '../extensions/arrayExtension';
 import TaskModel from '../models/taskModel';
+import DbModel from '../models/dbModel';
+import CacheModel from '../models/cacheModel';
 
 
-export enum TaskStatus{
-    Draf,
-    Process,
-    Expired
+
+export type cacheServers<T> = {
+    taskDb: T,
+    cacheDb: T,
 }
 
 export default class TaskController {
+
+    private readonly CacheDbs:cacheServers<DbModel> = {
+        taskDb : new TaskModel() as DbModel,
+        cacheDb : new CacheModel() as DbModel
+    };
+
 
     private unknowErrorHandler(res:express.Response, err:any, msg?:string){
         // TODO 資料要補寫到System的Log中
@@ -31,7 +39,11 @@ export default class TaskController {
     public async getTasks(req:express.Request, res:express.Response):Promise<void>{
         try{
             const account:string = req.body.account;
-            const allTasks = await TaskModel.getTasks(account);
+            let allTasks = await this.CacheDbs.cacheDb.getTasks(account);
+            if(!allTasks){
+                allTasks = await this.CacheDbs.taskDb.getTasks(account);
+                this.CacheDbs.cacheDb.saveTasks(account,allTasks);
+            }
             Backend.Response.success(res,allTasks);
         }catch(err){
             return this.unknowErrorHandler(res,err);
@@ -45,14 +57,15 @@ export default class TaskController {
      */
     public async addTask(req:express.Request, res:express.Response):Promise<void>{
         try{
-            const task:TaskConfig.Draf = {
+            const draf:TaskConfig.Draf = {
                 title: req.body.title,
                 content: req.body.content
             }
             const account:string = req.body.account;
-            const tId:string = TaskModel.generateTaskID(account);
-            const bSuccess = await TaskModel.addTask(account,task,tId);
+            const tId:string = this.CacheDbs.taskDb.generateTaskID(account);
+            const bSuccess = await this.CacheDbs.taskDb.addTask(account,draf,tId);
             if(bSuccess){
+                this.CacheDbs.cacheDb.addTask(account,draf,tId);
                 return Backend.Response.success(res,{});
             }
             return Backend.Response.error(res,Backend.Response.Status.DBError,"",201);
@@ -71,8 +84,12 @@ export default class TaskController {
         try{
             const account:string = req.body.account;
             const tId:string = req.body.tid;
-            const success = await TaskModel.conformDrafToTask(account,tId);
-            return success ? Backend.Response.success(res,{}) : Backend.Response.error(res,Backend.Response.Status.DBError,"",400);
+            const task = await this.CacheDbs.taskDb.conformTask(account,tId);
+            if(task){
+                this.CacheDbs.cacheDb.conformTask(account,tId,task);
+                return Backend.Response.success(res,{})
+            }
+            return Backend.Response.error(res,Backend.Response.Status.DBError,"",400);
         }catch(err){
             // return this.unknowErrorHandler(res,err);
         }

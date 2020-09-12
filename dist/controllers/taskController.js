@@ -12,19 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TaskStatus = void 0;
 const backend_1 = __importDefault(require("../modules/backend"));
 require("../extensions/numberExtension");
 require("../extensions/dateExtension");
 require("../extensions/arrayExtension");
 const taskModel_1 = __importDefault(require("../models/taskModel"));
-var TaskStatus;
-(function (TaskStatus) {
-    TaskStatus[TaskStatus["Draf"] = 0] = "Draf";
-    TaskStatus[TaskStatus["Process"] = 1] = "Process";
-    TaskStatus[TaskStatus["Expired"] = 2] = "Expired";
-})(TaskStatus = exports.TaskStatus || (exports.TaskStatus = {}));
+const cacheModel_1 = __importDefault(require("../models/cacheModel"));
 class TaskController {
+    constructor() {
+        this.CacheDbs = {
+            taskDb: new taskModel_1.default(),
+            cacheDb: new cacheModel_1.default()
+        };
+    }
     unknowErrorHandler(res, err, msg) {
         // TODO 資料要補寫到System的Log中
         console.log(`##CatchError##:${err instanceof Error ? err.stack : err}`);
@@ -39,7 +39,11 @@ class TaskController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const account = req.body.account;
-                const allTasks = yield taskModel_1.default.getTasks(account);
+                let allTasks = yield this.CacheDbs.cacheDb.getTasks(account);
+                if (!allTasks) {
+                    allTasks = yield this.CacheDbs.taskDb.getTasks(account);
+                    this.CacheDbs.cacheDb.saveTasks(account, allTasks);
+                }
                 backend_1.default.Response.success(res, allTasks);
             }
             catch (err) {
@@ -55,14 +59,15 @@ class TaskController {
     addTask(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const task = {
+                const draf = {
                     title: req.body.title,
                     content: req.body.content
                 };
                 const account = req.body.account;
-                const tId = taskModel_1.default.generateTaskID(account);
-                const bSuccess = yield taskModel_1.default.addTask(account, task, tId);
+                const tId = this.CacheDbs.taskDb.generateTaskID(account);
+                const bSuccess = yield this.CacheDbs.taskDb.addTask(account, draf, tId);
                 if (bSuccess) {
+                    this.CacheDbs.cacheDb.addTask(account, draf, tId);
                     return backend_1.default.Response.success(res, {});
                 }
                 return backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 201);
@@ -82,8 +87,12 @@ class TaskController {
             try {
                 const account = req.body.account;
                 const tId = req.body.tid;
-                const success = yield taskModel_1.default.conformDrafToTask(account, tId);
-                return success ? backend_1.default.Response.success(res, {}) : backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 400);
+                const task = yield this.CacheDbs.taskDb.conformTask(account, tId);
+                if (task) {
+                    this.CacheDbs.cacheDb.conformTask(account, tId, task);
+                    return backend_1.default.Response.success(res, {});
+                }
+                return backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 400);
             }
             catch (err) {
                 // return this.unknowErrorHandler(res,err);

@@ -6,7 +6,7 @@ Number.prototype.exFloor || Object.defineProperty(Number.prototype, 'exFloor', {
     }
 });
 // tslint:disable-next-line: no-unused-expression
-Number.prototype.exFloorTimeToSec || Object.defineProperty(Number.prototype, 'exFloorTimeToSec', {
+Number.prototype.exToSec || Object.defineProperty(Number.prototype, 'exToSec', {
     enumerable: false,
     value() {
         return Math.floor(this / 1000);

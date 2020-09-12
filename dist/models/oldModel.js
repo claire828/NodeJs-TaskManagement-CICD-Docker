@@ -63,7 +63,7 @@ class OldModel {
             yield tedisInst_1.default.get().del(tId);
             const draf = value.exToObj();
             const mappingStruct = this.generateMappingStruct(draf, tId, TaskConfig_1.default.Status.Conform, {
-                st: Date.now().exFloorTimeToSec().toString()
+                st: Date.now().exToSec().toString()
             });
             const task = this.mappingDrafToTaskStruct(mappingStruct);
             yield mongoInst_1.default.roloTasks.updateOne({ account }, { $addToSet: { tasks: task }, $pull: { drafs: tId } }, { upsert: true });
@@ -137,7 +137,7 @@ class OldModel {
         };
     }
     static generateTaskID(account) {
-        return `${account}${Date.now().exFloorTimeToSec()}`;
+        return `${account}${Date.now().exToSec()}`;
     }
 }
 exports.default = OldModel;

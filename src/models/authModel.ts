@@ -18,7 +18,7 @@ export default class AuthModel{
             const user:MongoConfig.Scheme.UserCollect = {
                 account,
                 pw:hashedPassword,
-                joinT :Date.now().exFloorTimeToSec().toString()
+                joinT :Date.now().exToSec().toString()
             }
             MongoInst.roloUsers.insertOne(user);
             return Backend.Response.Status.Success;

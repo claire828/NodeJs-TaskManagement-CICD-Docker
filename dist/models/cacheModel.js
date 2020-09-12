@@ -13,27 +13,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const TaskConfig_1 = __importDefault(require("../configs/TaskConfig"));
-const tedisInst_1 = __importDefault(require("../instances/tedisInst"));
 require("../extensions/numberExtension");
 require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
-class CacheModel {
-    static getTasks(account) {
+const dbModel_1 = __importDefault(require("./dbModel"));
+class CacheModel extends dbModel_1.default {
+    constructor() {
+        super(...arguments);
+        this.ExpiredSec = (4).exHoursInSec();
+    }
+    getTasks(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            const strTasks = yield this.getTask(account);
+            const strTasks = yield this.retrieveTask(account);
             if (strTasks)
                 return strTasks.exToObj();
             return null;
         });
     }
     // 儲存整筆Task的快取
-    static SaveTasksToCache(account, allTasks) {
-        tedisInst_1.default.get().setex(account, this.ExpiredSec, JSON.stringify(allTasks));
+    saveTasks(account, allTasks) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.db.setex(account, this.ExpiredSec, JSON.stringify(allTasks));
+        });
     }
     // add task (draf)
-    static addTask(account, draf, tId) {
+    addTask(account, draf, tId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cacheList = yield this.getTaskList(account);
+            const cacheList = yield this.retrieveTaskList(account);
             if (cacheList) {
                 cacheList.push({
                     title: draf.title,
@@ -41,37 +47,32 @@ class CacheModel {
                     tId,
                     status: TaskConfig_1.default.Status.Draf,
                 });
-                this.SaveTasksToCache(account, cacheList);
+                this.saveTasks(account, cacheList);
             }
+            return true;
         });
     }
     // conform DrafToTask
-    static conformDrafToTask(account, tId, task) {
+    conformTask(account, tId, task) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cacheList = yield this.getTaskList(account);
+            const cacheList = yield this.retrieveTaskList(account);
             if (cacheList) {
                 const inx = cacheList.findIndex(x => x.tId === tId);
                 if (inx === -1)
                     return;
                 cacheList[inx] = task;
-                this.SaveTasksToCache(account, cacheList);
+                this.saveTasks(account, cacheList);
             }
+            return task;
         });
     }
-    //TODO 這邊可以用<T>來做
-    static getTaskList(account) {
+    // TODO 這邊可以用<T>來做
+    retrieveTaskList(account) {
         return __awaiter(this, void 0, void 0, function* () {
-            const oldCache = yield this.getTask(account);
+            const oldCache = yield this.retrieveTask(account);
             return oldCache ? oldCache.exToObj() : null;
-        });
-    }
-    static getTask(key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const oldCache = yield tedisInst_1.default.get().get(key);
-            return (oldCache === null || oldCache === void 0 ? void 0 : oldCache.toString()) || null;
         });
     }
 }
 exports.default = CacheModel;
-CacheModel.ExpiredSec = (4).exHoursInSec();
 //# sourceMappingURL=cacheModel.js.map
