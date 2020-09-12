@@ -1,26 +1,22 @@
 version: '3'
 services:
   mongo:
-    image: mongo
+    build: ./docker/mongo/
     container_name: c_mongo
     restart: always
-   # environment:
-    #  - MONGO_INITDB_ROOT_USERNAME=claire
-    #  - MONGO_INITDB_ROOT_PASSWORD=123456
     ports:
       - "27017:27017"
     volumes:
-    #  - './mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro'
       - './mongo/data:/data/db'
     command: mongod 
   redis:
-    image: 'redis:alpine'
+    build: ./docker/redis/
     container_name: "c_redis"
     restart: always
     ports:
       - "6379:6379"
   node:
-    image: node:10.15.1
+    build: ./docker/node/
     container_name: c_node
     network_mode: "host"
     working_dir: /usr/src/app
