@@ -62,6 +62,9 @@ jobs:
         # be deployed to ECS.
         docker-compose build 
         echo "$ECR_REGISTRY/$ECR_REPOSITORY"
+        docker tag taskmanagerbackend_mongo:latest $ECR_REGISTRY/taskmanagerbackend_mongo:latest
+        docker tag taskmanagerbackend_redis:latest $ECR_REGISTRY/taskmanagerbackend_redis:latest
+        docker tag taskmanagerbackend_node:latest $ECR_REGISTRY/taskmanagerbackend_node:latest
         docker push $ECR_REGISTRY/taskmanagerbackend_mongo:latest
         docker push $ECR_REGISTRY/taskmanagerbackend_redis:latest
         docker push $ECR_REGISTRY/taskmanagerbackend_node:latest
