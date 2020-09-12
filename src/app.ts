@@ -17,17 +17,17 @@ export default class App{
     this.initial();
   }
 
-  public async initial(){
+  public initial(){
     this.app = express();
     this.applyMiddlewares();
     this.addRoutes();
     this.redirectUnexpectedRoute();
-    await this.initialInstances();
+    this.initialInstances();
   }
 
-  private async initialInstances(){
-    await TedisInst.init();
-    await MongoInst.init();
+  private initialInstances(){
+    TedisInst.init();
+    MongoInst.init();
   }
 
   private applyMiddlewares(){

@@ -36,8 +36,8 @@ export default class TaskModel extends DbModel{
         await TedisInst.get().del(tId);
         const draf = value.exToObj() as TaskConfig.Draf;
         task = {
-            title: draf.title ?? "",
-            content: draf.content ?? "",
+            title: draf.title,
+            content: draf.content,
             tId,
             status:TaskConfig.Status.Conform,
             t:{st:Date.now().exToSec().toString()}

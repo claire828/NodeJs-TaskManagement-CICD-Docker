@@ -49,7 +49,6 @@ class TaskModel extends dbModel_1.default {
         });
     }
     conform(account, tId, task) {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             const value = yield this.retrieveByKey(tId);
             if (!value)
@@ -57,8 +56,8 @@ class TaskModel extends dbModel_1.default {
             yield tedisInst_1.default.get().del(tId);
             const draf = value.exToObj();
             task = {
-                title: (_a = draf.title) !== null && _a !== void 0 ? _a : "",
-                content: (_b = draf.content) !== null && _b !== void 0 ? _b : "",
+                title: draf.title,
+                content: draf.content,
                 tId,
                 status: TaskConfig_1.default.Status.Conform,
                 t: { st: Date.now().exToSec().toString() }
