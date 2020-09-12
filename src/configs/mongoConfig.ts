@@ -1,4 +1,4 @@
-import TaskConfig from "./TaskConfig";
+import TaskConfig from "./taskConfig";
 
 
 // tslint:disable-next-line: no-namespace

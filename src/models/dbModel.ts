@@ -1,4 +1,4 @@
-import TaskConfig from "../configs/TaskConfig";
+import TaskConfig from "../configs/taskConfig";
 import TedisInst from "../instances/tedisInst";
 import { Tedis } from "tedis";
 

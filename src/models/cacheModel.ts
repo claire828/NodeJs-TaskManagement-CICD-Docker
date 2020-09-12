@@ -1,4 +1,4 @@
-import TaskConfig from "../configs/TaskConfig";
+import TaskConfig from "../configs/taskConfig";
 import '../extensions/numberExtension';
 import '../extensions/arrayExtension';
 import '../extensions/stringExtension';

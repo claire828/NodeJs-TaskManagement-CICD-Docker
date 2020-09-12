@@ -1,6 +1,6 @@
 import express from 'express';
 import Response from '../modules/backend';
-import TaskConfig from '../configs/TaskConfig';
+import TaskConfig from '../configs/taskConfig';
 import '../extensions/numberExtension';
 import '../extensions/dateExtension';
 import '../extensions/arrayExtension';
@@ -29,6 +29,7 @@ export default class TaskController {
      * @param res out
      */
     public async getTasks(req:express.Request, res:express.Response):Promise<void>{
+
         const param = Req.parsePostParam(req, {
             account: Req.ParseParamType.String,
         });
