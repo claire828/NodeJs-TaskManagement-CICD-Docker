@@ -28,7 +28,7 @@ class TaskController {
     unknowErrorHandler(res, err, msg) {
         // TODO 資料要補寫到System的Log中
         console.log(`##CatchError##:${err instanceof Error ? err.stack : err}`);
-        return backend_1.default.Response.error(res, backend_1.default.Response.Status.FailureExecuting, msg, 400);
+        return backend_1.default.error(res, backend_1.default.Status.FailureExecuting, msg, 400);
     }
     /**
      * [API EndPoint] Get All Tasks
@@ -44,7 +44,7 @@ class TaskController {
                     allTasks = yield this.CacheDbs.taskDb.getTasks(account);
                     this.CacheDbs.cacheDb.saveTasks(account, allTasks);
                 }
-                backend_1.default.Response.success(res, allTasks);
+                backend_1.default.success(res, allTasks);
             }
             catch (err) {
                 return this.unknowErrorHandler(res, err);
@@ -68,9 +68,9 @@ class TaskController {
                 const bSuccess = yield this.CacheDbs.taskDb.addTask(account, draf, tId);
                 if (bSuccess) {
                     this.CacheDbs.cacheDb.addTask(account, draf, tId);
-                    return backend_1.default.Response.success(res, {});
+                    return backend_1.default.success(res, {});
                 }
-                return backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 201);
+                return backend_1.default.error(res, backend_1.default.Status.DBError, "", 201);
             }
             catch (err) {
                 return this.unknowErrorHandler(res, err);
@@ -90,9 +90,9 @@ class TaskController {
                 const task = yield this.CacheDbs.taskDb.conformTask(account, tId);
                 if (task) {
                     this.CacheDbs.cacheDb.conformTask(account, tId, task);
-                    return backend_1.default.Response.success(res, {});
+                    return backend_1.default.success(res, {});
                 }
-                return backend_1.default.Response.error(res, backend_1.default.Response.Status.DBError, "", 400);
+                return backend_1.default.error(res, backend_1.default.Status.DBError, "", 400);
             }
             catch (err) {
                 // return this.unknowErrorHandler(res,err);

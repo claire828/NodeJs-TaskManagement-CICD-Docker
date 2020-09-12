@@ -58,7 +58,7 @@ export class Token<T> {
 
     public async isTokenLegal(token:string):Promise<boolean>{
         const infoToken = LoginToken.decode(token);
-        console.log(`decodeToken:${JSON.stringify(infoToken)}`);
+       // console.log(`decodeToken:${JSON.stringify(infoToken)}`);
         const validTime = (this.TokenValidateSec + Date.now().exToSec());
         if(!infoToken || !infoToken.account || !infoToken.expire || infoToken.expire > validTime){
             return false;

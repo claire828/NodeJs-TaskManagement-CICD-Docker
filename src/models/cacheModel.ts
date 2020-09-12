@@ -48,7 +48,6 @@ export default class CacheModel extends DbModel {
         return task;
     }
 
-    // TODO 這邊可以用<T>來做
     public async retrieveTaskList(account:string):Promise<TaskConfig.Task[]>{
         const oldCache = await this.retrieveTask(account);
         return oldCache ? (oldCache.exToObj() as TaskConfig.Task[]) : null;

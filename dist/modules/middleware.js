@@ -51,7 +51,7 @@ var Middleware;
     Middleware.noCahce = noCahce;
     function verifyPostBody(req, res, next) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, 'Empty POST', 201);
+            return backend_1.default.error(res, backend_1.default.Status.InsufficientParameters, 'Empty POST', 201);
         }
         next();
     }
@@ -74,7 +74,7 @@ var Middleware;
                 if (bLegle)
                     return next();
             }
-            backend_1.default.Response.verifyError(res);
+            backend_1.default.verifyError(res);
         });
     }
     Middleware.verifyToken = verifyToken;

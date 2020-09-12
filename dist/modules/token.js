@@ -78,7 +78,7 @@ class Token {
     isTokenLegal(token) {
         return __awaiter(this, void 0, void 0, function* () {
             const infoToken = exports.LoginToken.decode(token);
-            console.log(`decodeToken:${JSON.stringify(infoToken)}`);
+            // console.log(`decodeToken:${JSON.stringify(infoToken)}`);
             const validTime = (this.TokenValidateSec + Date.now().exToSec());
             if (!infoToken || !infoToken.account || !infoToken.expire || infoToken.expire > validTime) {
                 return false;

@@ -19,13 +19,11 @@ require("../extensions/numberExtension");
 require("../extensions/arrayExtension");
 require("../extensions/stringExtension");
 const dbModel_1 = __importDefault(require("./dbModel"));
-// TODO 感覺這個可以新增一個Class作為CacheServer
 class TaskModel extends dbModel_1.default {
     constructor() {
         super(...arguments);
         this.ExpiredSec = (24).exHoursInSec();
     }
-    // [API-getAllTask] 從cache server中取得，如果不存在就從mongo取出
     getTasks(account) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.retrieveFromServer(account);
@@ -36,7 +34,6 @@ class TaskModel extends dbModel_1.default {
             return;
         });
     }
-    // 儲存草稿到Mongo&Redis
     addTask(account, draf, tId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -54,7 +51,7 @@ class TaskModel extends dbModel_1.default {
     conformTask(account, tId, task) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            const value = yield this.getTask(tId);
+            const value = yield this.retrieveTask(tId);
             if (!value)
                 return null;
             yield tedisInst_1.default.get().del(tId);
@@ -70,20 +67,13 @@ class TaskModel extends dbModel_1.default {
             return task;
         });
     }
-    getTask(key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const oldCache = yield tedisInst_1.default.get().get(key);
-            return (oldCache === null || oldCache === void 0 ? void 0 : oldCache.toString()) || null;
-        });
-    }
-    // 從正式ＤＢ中取得資料
     retrieveFromServer(account) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const target = yield mongoInst_1.default.roloTasks.findOne({ account });
             const list = (_a = target.tasks) !== null && _a !== void 0 ? _a : [];
             for (const tId of target.drafs) {
-                const task = yield this.getTask(tId);
+                const task = yield this.retrieveTask(tId);
                 if (!task)
                     continue;
                 const draf = task.exToObj();

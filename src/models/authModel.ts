@@ -3,16 +3,16 @@ import '../extensions/numberExtension';
 import '../extensions/arrayExtension';
 import '../extensions/stringExtension';
 import MongoConfig from "../configs/mongoConfig";
-import Backend from "../modules/backend";
+import Response from "../modules/backend";
 import bcrypt from 'bcrypt';
 import { LoginToken } from "../modules/token";
 
 
 export default class AuthModel{
 
-    public static async registerUser(account:string, pw:string):Promise<Backend.Response.Status>{
+    public static async registerUser(account:string, pw:string):Promise<Response.Status>{
         const bValidation = await this.validateRegist(account);
-        if(bValidation!== Backend.Response.Status.Success) return bValidation;
+        if(bValidation!== Response.Status.Success) return bValidation;
         try{
             const hashedPassword = await bcrypt.hash(pw, LoginToken.SaltRounds)
             const user:MongoConfig.Scheme.UserCollect = {
@@ -21,9 +21,9 @@ export default class AuthModel{
                 joinT :Date.now().exToSec().toString()
             }
             MongoInst.roloUsers.insertOne(user);
-            return Backend.Response.Status.Success;
+            return Response.Status.Success;
         }catch(err){
-            return Backend.Response.Status.FailureExecuting;
+            return Response.Status.FailureExecuting;
         }
     }
 
@@ -34,12 +34,12 @@ export default class AuthModel{
     }
 
 
-    private static async validateRegist(account:string):Promise<Backend.Response.Status>{
+    private static async validateRegist(account:string):Promise<Response.Status>{
         if(this.validateEmail(account)){
             const bExist = await this.isUserExist(account);
-            return bExist ? Backend.Response.Status.UserExisting : Backend.Response.Status.Success;
+            return bExist ? Response.Status.UserExisting : Response.Status.Success;
         }
-        return Backend.Response.Status.EmailError;
+        return Response.Status.EmailError;
     }
 
     private static validateEmail(email:string) {

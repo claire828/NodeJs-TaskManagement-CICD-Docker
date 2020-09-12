@@ -66,7 +66,6 @@ class CacheModel extends dbModel_1.default {
             return task;
         });
     }
-    // TODO 這邊可以用<T>來做
     retrieveTaskList(account) {
         return __awaiter(this, void 0, void 0, function* () {
             const oldCache = yield this.retrieveTask(account);

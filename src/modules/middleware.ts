@@ -1,6 +1,6 @@
 import express from 'express';
 import * as _ from "underscore";
-import Backend from './backend';
+import Response from './backend';
 import AuthModel from '../models/authModel';
 import { LoginToken } from './token';
 
@@ -21,7 +21,7 @@ namespace Middleware {
 
     export function verifyPostBody(req: express.Request, res: express.Response, next: express.NextFunction) {
         if (!_.isObject(req.body) || _.isEmpty(req.body)) {
-            return Backend.Response.error(res, Backend.Response.Status.InsufficientParameters, 'Empty POST',201);
+            return Response.error(res, Response.Status.InsufficientParameters, 'Empty POST',201);
         }
         next();
     }
@@ -42,7 +42,7 @@ namespace Middleware {
             const bLegle = await LoginToken.isTokenLegal(req.body.token);
             if(bLegle) return next();
         }
-        Backend.Response.verifyError(res);
+        Response.verifyError(res);
     }
 
 

@@ -23,7 +23,7 @@ class AuthModel {
     static registerUser(account, pw) {
         return __awaiter(this, void 0, void 0, function* () {
             const bValidation = yield this.validateRegist(account);
-            if (bValidation !== backend_1.default.Response.Status.Success)
+            if (bValidation !== backend_1.default.Status.Success)
                 return bValidation;
             try {
                 const hashedPassword = yield bcrypt_1.default.hash(pw, token_1.LoginToken.SaltRounds);
@@ -33,10 +33,10 @@ class AuthModel {
                     joinT: Date.now().exToSec().toString()
                 };
                 mongoInst_1.default.roloUsers.insertOne(user);
-                return backend_1.default.Response.Status.Success;
+                return backend_1.default.Status.Success;
             }
             catch (err) {
-                return backend_1.default.Response.Status.FailureExecuting;
+                return backend_1.default.Status.FailureExecuting;
             }
         });
     }
@@ -52,9 +52,9 @@ class AuthModel {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.validateEmail(account)) {
                 const bExist = yield this.isUserExist(account);
-                return bExist ? backend_1.default.Response.Status.UserExisting : backend_1.default.Response.Status.Success;
+                return bExist ? backend_1.default.Status.UserExisting : backend_1.default.Status.Success;
             }
-            return backend_1.default.Response.Status.EmailError;
+            return backend_1.default.Status.EmailError;
         });
     }
     static validateEmail(email) {

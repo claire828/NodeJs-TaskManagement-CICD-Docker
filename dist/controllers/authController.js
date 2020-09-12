@@ -22,15 +22,15 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const [account, pw] = [(_a = req.body) === null || _a === void 0 ? void 0 : _a.account, (_b = req.body) === null || _b === void 0 ? void 0 : _b.pw];
-                let status = backend_1.default.Response.Status.InsufficientParameters;
+                let status = backend_1.default.Status.InsufficientParams;
                 if (!underscore_1.default.isEmpty(account) && underscore_1.default.isString(account) && !underscore_1.default.isEmpty(pw) && underscore_1.default.isString(pw)) {
                     status = yield authModel_1.default.registerUser(account, pw);
-                    if (status === backend_1.default.Response.Status.Success) {
-                        return backend_1.default.Response.success(res, {});
+                    if (status === backend_1.default.Status.Success) {
+                        return backend_1.default.success(res, {});
                     }
-                    return backend_1.default.Response.error(res, status, "Register Failed", 400);
+                    return backend_1.default.error(res, status, "Register Failed", 400);
                 }
-                return backend_1.default.Response.error(res, status, "InsufficientParameters", 400);
+                return backend_1.default.error(res, status, "InsufficientParams", 400);
             }
             catch (err) {
                 console.log("ERRR");
@@ -41,16 +41,15 @@ class AuthController {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // TODO 使用帳密登入 或 TOKEN
                 const [account, pw] = [(_a = req.body) === null || _a === void 0 ? void 0 : _a.account, (_b = req.body) === null || _b === void 0 ? void 0 : _b.pw];
                 if (!underscore_1.default.isEmpty(account) && underscore_1.default.isString(account) && !underscore_1.default.isEmpty(pw) && underscore_1.default.isString(pw)) {
                     if (yield authModel_1.default.isUserMath(account, pw)) {
                         const token = token_1.LoginToken.generateToken(req.body.account);
-                        return backend_1.default.Response.success(res, { token });
+                        return backend_1.default.success(res, { token });
                     }
-                    return backend_1.default.Response.error(res, backend_1.default.Response.Status.Verify, "login Failed", 400);
+                    return backend_1.default.error(res, backend_1.default.Status.Verify, "login Failed", 400);
                 }
-                return backend_1.default.Response.error(res, backend_1.default.Response.Status.InsufficientParameters, "InsufficientParameters", 400);
+                return backend_1.default.error(res, backend_1.default.Status.InsufficientParams, "InsufficientParams", 400);
             }
             catch (err) {
                 console.log("ERRR");

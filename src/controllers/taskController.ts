@@ -1,8 +1,6 @@
-import express, { json } from 'express';
-import Backend from '../modules/backend';
-import TedisInst from '../instances/tedisInst';
+import express from 'express';
+import Response from '../modules/backend';
 import TaskConfig from '../configs/TaskConfig';
-import MongoInst from '../instances/mongoInst';
 import '../extensions/numberExtension';
 import '../extensions/dateExtension';
 import '../extensions/arrayExtension';
@@ -28,7 +26,7 @@ export default class TaskController {
     private unknowErrorHandler(res:express.Response, err:any, msg?:string){
         // TODO 資料要補寫到System的Log中
         console.log(`##CatchError##:${err instanceof Error ? err.stack : err}`);
-        return Backend.Response.error(res,Backend.Response.Status.FailureExecuting,msg,400);
+        return Response.error(res,Response.Status.FailureExecuting,msg,400);
     }
 
     /**
@@ -44,7 +42,7 @@ export default class TaskController {
                 allTasks = await this.CacheDbs.taskDb.getTasks(account);
                 this.CacheDbs.cacheDb.saveTasks(account,allTasks);
             }
-            Backend.Response.success(res,allTasks);
+            Response.success(res,allTasks);
         }catch(err){
             return this.unknowErrorHandler(res,err);
         }
@@ -66,9 +64,9 @@ export default class TaskController {
             const bSuccess = await this.CacheDbs.taskDb.addTask(account,draf,tId);
             if(bSuccess){
                 this.CacheDbs.cacheDb.addTask(account,draf,tId);
-                return Backend.Response.success(res,{});
+                return Response.success(res,{});
             }
-            return Backend.Response.error(res,Backend.Response.Status.DBError,"",201);
+            return Response.error(res,Response.Status.DBError,"",201);
         }catch(err){
             return this.unknowErrorHandler(res,err);
         }
@@ -87,9 +85,9 @@ export default class TaskController {
             const task = await this.CacheDbs.taskDb.conformTask(account,tId);
             if(task){
                 this.CacheDbs.cacheDb.conformTask(account,tId,task);
-                return Backend.Response.success(res,{})
+                return Response.success(res,{})
             }
-            return Backend.Response.error(res,Backend.Response.Status.DBError,"",400);
+            return Response.error(res,Response.Status.DBError,"",400);
         }catch(err){
             // return this.unknowErrorHandler(res,err);
         }
