@@ -24,8 +24,9 @@
 #    and best practices on handling the access key credentials.
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - dev
 
 name: Deploy to Amazon ECS
 
@@ -60,7 +61,11 @@ jobs:
         # push it to ECR so that it can
         # be deployed to ECS.
         docker-compose build 
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:backend_node:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:backend_mongo:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:backend_redis:latest
+        echo "$ECR_REGISTRY/$ECR_REPOSITORY"
+        docker tag taskmanagerbackend_mongo:latest $ECR_REGISTRY/taskmanagerbackend_mongo:latest
+        docker tag taskmanagerbackend_redis:latest $ECR_REGISTRY/taskmanagerbackend_redis:latest
+        docker tag taskmanagerbackend_node:latest $ECR_REGISTRY/taskmanagerbackend_node:latest
+        docker push $ECR_REGISTRY/taskmanagerbackend_mongo:latest
+        docker push $ECR_REGISTRY/taskmanagerbackend_redis:latest
+        docker push $ECR_REGISTRY/taskmanagerbackend_node:latest
         # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
