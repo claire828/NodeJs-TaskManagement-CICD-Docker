@@ -2,7 +2,7 @@ version: '3'
 services:
   mongo:
     build: ./docker/mongo/
-    container_name: c_mongo
+    #container_name: c_mongo
     restart: always
     ports:
       - "27017:27017"
@@ -11,18 +11,20 @@ services:
     command: mongod 
   redis:
     build: ./docker/redis/
-    container_name: "c_redis"
+   # container_name: "c_redis"
     restart: always
     ports:
       - "6379:6379"
   node:
-    build: ./docker/node/
-    container_name: c_node
+    build: 
+      context: ./
+      dockerfile: ./docker/node/Dockerfile
+   # container_name: c_node
     network_mode: "host"
     working_dir: /usr/src/app
     restart: always
-    ports:
-      - "3000:3000"
-    volumes:
-      - '.:/usr/src/app'
-    command: bash -c "npm install && npm build && npm start"
+ #   ports:
+  #    - "3000:3000"
+  #  volumes:
+   #   - '.:/usr/src/app'
+   # command: bash -c "npm install && npm build && npm start"

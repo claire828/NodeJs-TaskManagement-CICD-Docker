@@ -32,6 +32,14 @@ namespace Middleware {
         next();
     }
 
+    export function addAuthHeaderHeader(req: express.Request, res: express.Response, next: express.NextFunction){
+        res.header("Access-Control-Allow-Headers", "Authorization");
+        next();
+    }
+
+
+    
+
     export function unknownRoute(req: express.Request, res: express.Response, next: express.NextFunction): void {
         return res.status(403).end();
     }

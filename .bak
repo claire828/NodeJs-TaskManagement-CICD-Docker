@@ -1,0 +1,7 @@
+
+    docker pull 517766412746.dkr.ecr.us-east-2.amazonaws.com/taskmanagerbackend_node:latest
+
+
+    aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin https://517766412746.dkr.ecr.us-east-2.amazonaws.com docker pull 517766412746.dkr.ecr.us-east-2.amazonaws.com/taskmanagerbackend_node:latest 
+Fabian Bäuerlein對所有人說： (5:04 上午)
+ docker run -d 517766412746.dkr.ecr.us-east-2.amazonaws.com/taskmanagerbackend_node:latest
