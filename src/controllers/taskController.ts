@@ -8,7 +8,7 @@ import TaskModel from '../models/taskModel';
 import DbModel from '../models/dbModel';
 import CacheModel from '../models/cacheModel';
 import { Req } from '../modules/req';
-
+import AWS from 'aws-sdk';
 
 
 export type cacheServers<T> = {
@@ -17,6 +17,12 @@ export type cacheServers<T> = {
 }
 
 export default class TaskController {
+
+    constructor(){
+        AWS.config.update({
+            region:'us-east-2'
+        });
+    }
 
     private readonly CacheDbs:cacheServers<DbModel> = {
         taskDb : new TaskModel() as DbModel,
@@ -66,10 +72,48 @@ export default class TaskController {
         const tId:string = this.CacheDbs.taskDb.generateTaskID(param.account);
         const bSuccess = await this.CacheDbs.taskDb.add(param.account,draf,tId);
         if(!bSuccess) return Response.error(res,Response.Status.DBError,"",400);
+        this.sendEmail(param.account,draf);
         this.CacheDbs.cacheDb.add(param.account,draf,tId);
         return Response.success(res,{});
     }
 
+    private sendEmail(account:string, draf:TaskConfig.Draf){
+        // Load the AWS SDK for Node.js
+        // Create sendEmail params
+        const fromAddress = 'iamclaire.cheng@gmail.com';
+        const params = {
+            Destination: {
+                ToAddresses: [account]
+            },
+            Message: {
+                    Body: {
+                        Text: {
+                            Charset: "UTF-8",
+                            Data: `Your draf [${draf.title}] has been created`
+                        }
+                    },
+                    Subject: {
+                        Charset: 'UTF-8',
+                        Data: `Message from Task Manager`
+                    }
+                },
+            Source: fromAddress,
+            ReplyToAddresses: [ fromAddress ],
+        };
+
+        // Create the promise and SES service object
+        const sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+
+        // Handle promise's fulfilled/rejected states
+        sendPromise.then(
+        (data)=> {
+            console.log(data.MessageId);
+        }).catch(
+            (err)=> {
+            console.error(err, err.stack);
+        });
+
+    }
 
     /**
      * [API EndPoint] conform Task
