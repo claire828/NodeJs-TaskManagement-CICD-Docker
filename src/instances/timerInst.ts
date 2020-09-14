@@ -32,7 +32,7 @@ export default class TimerInst{
         return this.event.on(event, action);
     }
 
-    public rmListent(eventHandle:EventHandle){
+    public rmListen(eventHandle:EventHandle){
         this.event.rm(eventHandle);
     }
 

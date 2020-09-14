@@ -36,7 +36,7 @@ export default class AutoNotify{
 
     private exeJobFinish(){
         this.isJobDone = true;
-        TimerInst.instance.rmListent(this.eventHandler);
+        TimerInst.instance.rmListen(this.eventHandler);
     }
 
     private async sendEmailNotify(){

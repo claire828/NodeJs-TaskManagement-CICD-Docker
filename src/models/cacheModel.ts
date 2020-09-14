@@ -14,7 +14,6 @@ export default class CacheModel extends DbModel {
         return null;
     }
 
-     // 儲存整筆Task的快取
     public async saveAll(account:string, allTasks:TaskConfig.Task[] ){
         this.db.setex(account,this.ExpiredSec , JSON.stringify(allTasks));
     }

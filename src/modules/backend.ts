@@ -8,12 +8,12 @@ namespace Response{
     export enum Status {
         Success = 0,
         InsufficientParams = 1,
-        FailureExecuting = 2,
         DBError = 11,
         Token = 12,
         Verify = 13,
         UserExisting = 14,
-        EmailError=15
+        EmailError=15,
+        FailureExecuting = 16,
     }
     export interface ServerResponceContent {
         status: Status;

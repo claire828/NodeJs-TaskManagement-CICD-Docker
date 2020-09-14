@@ -56,10 +56,12 @@ export default class TaskController {
         }
         const tId:string = this.CacheDbs.taskDb.generateTaskID(param.account);
         const bSuccess = await this.CacheDbs.taskDb.add(param.account,draf,tId);
-        if(!bSuccess) return Response.error(res,Response.Status.DBError,"",400);
-        this.startEmailNotifyProcess(param.title, param.account);
-        this.CacheDbs.cacheDb.add(param.account,draf,tId);
-        return Response.success(res,{});
+        if(bSuccess){
+            this.startEmailNotifyProcess(param.title, param.account);
+            this.CacheDbs.cacheDb.add(param.account,draf,tId);
+            return Response.success(res,{});
+        }
+        return Response.error(res,Response.Status.DBError,"",400);
     }
 
 
@@ -71,7 +73,7 @@ export default class TaskController {
         if(!param) return Response.paramsError(res);
         try{
             const task = await this.CacheDbs.taskDb.conform(param.account,param.tId);
-            if(task){
+            if(!task){
                 this.CacheDbs.cacheDb.conform(param.account,param.tId,task);
                 return Response.success(res,{});
             }
