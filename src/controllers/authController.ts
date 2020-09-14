@@ -15,7 +15,8 @@ export default class AuthController{
         if(status === Response.Status.Success){
             return Response.success(res, {});
         }
-        return Response.error(res, status, "Register Failed", 400);
+        console.log(`code:!!${status}`);
+        return Response.error(res,status,"",400);
     }
 
     public async logIn(req:express.Request, res:express.Response){
@@ -26,7 +27,7 @@ export default class AuthController{
             const token = LoginToken.generateToken(req.body.account);
             return Response.success(res,{token});
         }
-        return Response.error(res, Response.Status.Verify, "login Failed", 400);
+        return Response.error(res, Response.Status.Verify, '', 400);
     }
 
     private mappingAuthParam(req:express.Request){

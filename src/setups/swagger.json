@@ -8,8 +8,11 @@
     },
     "tags": [
         {
-            "name": "Auths",
-            "description": "API for in the system"
+            "name":"Auth",
+            "description":"API for Authorization"
+        },{
+            "name":"Task",
+            "description":"API for Task Management"
         }
     ],
     "consumes": [
@@ -19,14 +22,14 @@
         "application/json"
     ],
     "paths": {
-        "/auth": {
+        "/auth/register": {
             "post": {
                 "tags": [
-                    "register"
+                    "Auth"
                 ],
-                "summary": "Create a new User",
+                "summary": "Create a new User (sing up with email)",
                 "requestBody": {
-                    "description": "User Object",
+                    "description": "Auth Object <br> account:Email ",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -47,7 +50,135 @@
                         }
                     },
                     "400": {
-                        "description": "Failed. Bad post data."
+                        "description": "Failed. Bad post.<br>  11: DB Error.<br> 12: Insufficient Params.<br> 13: Verify failure.<br> 14: The email has been taken.<br>  15: Wrong email formulation.<br>  16: Unexpected Error."
+                    }
+                }
+            }
+        },"/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User Login",
+                "requestBody": {
+                    "description": "Auth Object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/auth"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed. Bad post.<br>  11: DB Error.<br> 12: Insufficient Params.<br> 13: Verify failure.<br> 14: The email has been taken.<br>  15: Wrong email formulation.<br>  16: Unexpected Error."
+                    }
+                }
+            }
+        },"/task/add": {
+            "post": {
+                "tags": [
+                    "Task"
+                ],
+                "summary": "Add Task",
+                "requestBody": {
+                    "description": "",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/addTask"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/addTask"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed. Bad post.<br>  11: DB Error.<br> 12: Insufficient Params.<br> 13: Verify failure.<br> 14: The email has been taken.<br>  15: Wrong email formulation.<br>  16: Unexpected Error."
+                    }
+                }
+            }
+        },"/task/conform": {
+            "post": {
+                "tags": [
+                    "Task"
+                ],
+                "summary": "Conform Task",
+                "requestBody": {
+                    "description": "tId: task ID. You can see it through task/get API",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/conformTask"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/conformTask"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed. Bad post.<br>  11: DB Error.<br> 12: Insufficient Params.<br> 13: Verify failure.<br> 14: The email has been taken.<br>  15: Wrong email formulation.<br>  16: Unexpected Error."
+                    }
+                }
+            }
+        },"/task/get": {
+            "post": {
+                "tags": [
+                    "Task"
+                ],
+                "summary": "Get All Task List with Detail Information",
+                "requestBody": {
+                    "description": "User Object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/getTask"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/getTask"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed. Bad post.<br>  11: DB Error.<br> 12: Insufficient Params.<br> 13: Verify failure.<br> 14: The email has been taken.<br>  15: Wrong email formulation.<br>  16: Unexpected Error."
                     }
                 }
             }
@@ -61,6 +192,45 @@
                     "type": "string"
                 },
                 "pw": {
+                    "type": "string"
+                }
+            }
+        },"addTask": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "account": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                }
+            }
+        },"getTask": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "account": {
+                    "type": "string"
+                }
+            }
+        },"conformTask": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "account": {
+                    "type": "string"
+                },
+                "tId": {
                     "type": "string"
                 }
             }

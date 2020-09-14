@@ -73,7 +73,7 @@ export default class TaskController {
         if(!param) return Response.paramsError(res);
         try{
             const task = await this.CacheDbs.taskDb.conform(param.account,param.tId);
-            if(!task){
+            if(task){
                 this.CacheDbs.cacheDb.conform(param.account,param.tId,task);
                 return Response.success(res,{});
             }

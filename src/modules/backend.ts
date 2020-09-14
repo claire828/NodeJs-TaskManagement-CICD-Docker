@@ -7,9 +7,8 @@ namespace Response{
 
     export enum Status {
         Success = 0,
-        InsufficientParams = 1,
         DBError = 11,
-        Token = 12,
+        InsufficientParams = 12,
         Verify = 13,
         UserExisting = 14,
         EmailError=15,
@@ -48,7 +47,7 @@ namespace Response{
     }
 
     export function verifyError(res: express.Response ): void {
-        error(res, Status.Verify, "invalid client", 401);
+        error(res, Status.Verify, '', 401);
     }
 }
 export default Response;

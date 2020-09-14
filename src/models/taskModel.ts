@@ -52,6 +52,7 @@ export default class TaskModel extends DbModel{
         for (const tId of target.drafs){
             const task = await this.retrieveByKey(tId);
             if(!task) continue;
+
             const draf = task.exToObj() as TaskConfig.Draf;
             list.push({
                 title:draf.title,

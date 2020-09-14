@@ -11,8 +11,9 @@ import { LoginToken } from "../modules/token";
 export default class AuthModel{
 
     public static async registerUser(account:string, pw:string):Promise<Response.Status>{
-        const bValidation = await this.validateRegist(account);
-        if(bValidation!== Response.Status.Success) return bValidation;
+        const validationStatus = await this.validateRegist(account);
+        console.log(`aa:${validationStatus}`);
+        if(validationStatus!== Response.Status.Success) return validationStatus;
         try{
             const hashedPassword = await bcrypt.hash(pw, LoginToken.SaltRounds)
             const user:MongoConfig.Scheme.UserCollect = {
@@ -41,9 +42,11 @@ export default class AuthModel{
     private static async validateRegist(account:string):Promise<Response.Status>{
         try{
             if(this.validateEmail(account)){
-                const bExist = await this.isUserExist(account);
-                return bExist ? Response.Status.UserExisting : Response.Status.Success;
+                await this.isUserExist(account).then(exist=>{
+                    return exist ? Response.Status.UserExisting : Response.Status.Success;
+                });
             }
+            return Response.Status.EmailError;
         }catch(err){
             return Response.Status.EmailError;
         }
