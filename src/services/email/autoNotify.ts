@@ -30,6 +30,7 @@ export default class AutoNotify{
 
     private update(time:number){
         if(this.isJobDone || this.endTime > time) return;
+
         this.exeJobFinish();
         this.sendEmailNotify();
     }

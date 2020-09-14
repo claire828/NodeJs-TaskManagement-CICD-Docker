@@ -12,7 +12,6 @@ export default class AuthModel{
 
     public static async registerUser(account:string, pw:string):Promise<Response.Status>{
         const validationStatus = await this.validateRegist(account);
-        console.log(`aa:${validationStatus}`);
         if(validationStatus!== Response.Status.Success) return validationStatus;
         try{
             const hashedPassword = await bcrypt.hash(pw, LoginToken.SaltRounds)
@@ -32,6 +31,7 @@ export default class AuthModel{
         try{
             const member = await MongoInst.roloUsers.findOne({account});
             if(!member) return false;
+
             return await bcrypt.compare(pw,member.pw);
         }catch(err){
             return false;

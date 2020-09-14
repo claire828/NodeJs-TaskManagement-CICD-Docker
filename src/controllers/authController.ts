@@ -11,17 +11,18 @@ export default class AuthController{
     public async register(req:express.Request, res:express.Response){
         const param = this.mappingAuthParam(req);
         if(!param) return Response.paramsError(res);
+
         const status = await AuthModel.registerUser(param.account,param.pw);
         if(status === Response.Status.Success){
             return Response.success(res, {});
         }
-        console.log(`code:!!${status}`);
         return Response.error(res,status,"",400);
     }
 
     public async logIn(req:express.Request, res:express.Response){
         const param = this.mappingAuthParam(req);
         if(!param) return Response.paramsError(res);
+
         const bMatch = await AuthModel.isUserMath(param.account,param.pw);
         if(bMatch){
             const token = LoginToken.generateToken(req.body.account);

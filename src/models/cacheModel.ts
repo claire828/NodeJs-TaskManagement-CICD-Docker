@@ -4,6 +4,10 @@ import '../extensions/arrayExtension';
 import '../extensions/stringExtension';
 import DbModel from "./dbModel";
 
+/**
+ * Using For Caching TaskList.
+ * Redis<Key,Value> = < UserAccount, taskList>
+ */
 export default class CacheModel extends DbModel {
 
     readonly ExpiredSec = (4).exHoursInSec();
@@ -18,7 +22,6 @@ export default class CacheModel extends DbModel {
         this.db.setex(account,this.ExpiredSec , JSON.stringify(allTasks));
     }
 
-    // add task (draf)
     public async add(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>{
         const cacheList = await this.retrieveTaskList(account)
         if(cacheList){
@@ -33,7 +36,6 @@ export default class CacheModel extends DbModel {
         return true;
     }
 
-    // conform DrafToTask
     public async conform( account:string, tId:string, task:TaskConfig.Task ):Promise<TaskConfig.Task>{
         const cacheList = await this.retrieveTaskList(account)
         if(cacheList){

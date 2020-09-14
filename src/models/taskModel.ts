@@ -6,16 +6,15 @@ import '../extensions/arrayExtension';
 import '../extensions/stringExtension';
 import DbModel from "./dbModel";
 
-
+/**
+ * Redis DB - Cache Drafs Infomation.
+ * Redis <Key, Value> = <TaskID, TaskInfomation(draf) >
+ */
 export default class TaskModel extends DbModel{
     readonly ExpiredSec = (24).exHoursInSec();
 
     public async getAll(account:string):Promise<TaskConfig.Task[]>{
         return await this.retrieveFromServer(account);
-    }
-
-    public async saveAll(account:string, allTasks:TaskConfig.Task[] ){
-        return;
     }
 
     public async add(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>{
