@@ -38,8 +38,6 @@ namespace Middleware {
     }
 
 
-
-
     export function unknownRoute(req: express.Request, res: express.Response, next: express.NextFunction): void {
         return res.status(403).end();
     }

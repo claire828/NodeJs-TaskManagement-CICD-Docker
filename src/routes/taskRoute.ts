@@ -14,7 +14,10 @@ export default class TaskRoute extends BasicToute{
     }
 
     protected setRoutes():void{
-        // TODO 這邊的前墜可以封裝，直接問發好了
+        this.router.post('/task/get',
+            this.taskController.testMaill.bind(this.taskController)
+        );
+       /*
         this.router.post('/task/add',
              Middleware.verifyToken,
             this.taskController.addTask.bind(this.taskController)
@@ -26,7 +29,7 @@ export default class TaskRoute extends BasicToute{
         this.router.post('/task/conform',
             Middleware.verifyToken,
             this.taskController.conformTask.bind(this.taskController)
-        );
+        );*/
     }
 
 

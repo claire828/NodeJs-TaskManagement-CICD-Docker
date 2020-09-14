@@ -8,8 +8,7 @@ import TaskModel from '../models/taskModel';
 import DbModel from '../models/dbModel';
 import CacheModel from '../models/cacheModel';
 import { Req } from '../modules/req';
-import AWS from 'aws-sdk';
-
+import AutoNotify, { NotifyConfig } from '../services/email/autoNotify';
 
 export type cacheServers<T> = {
     taskDb: T,
@@ -18,24 +17,14 @@ export type cacheServers<T> = {
 
 export default class TaskController {
 
-    constructor(){
-        AWS.config.update({
-            region:'us-east-2'
-        });
-    }
-
     private readonly CacheDbs:cacheServers<DbModel> = {
         taskDb : new TaskModel() as DbModel,
         cacheDb : new CacheModel() as DbModel
     };
 
-    /**
-     * [API EndPoint] Get All Tasks
-     * @param req in
-     * @param res out
-     */
-    public async getTasks(req:express.Request, res:express.Response):Promise<void>{
+    private notifyCacheQueue:AutoNotify[] = [];
 
+    public async getTasks(req:express.Request, res:express.Response):Promise<void>{
         const param = Req.parsePostParam(req, {
             account: Req.ParseParamType.String,
         });
@@ -52,11 +41,7 @@ export default class TaskController {
         }
     }
 
-    /**
-     * [API EndPoint] Add Task
-     * @param req in
-     * @param res out
-     */
+
     public async addTask(req:express.Request, res:express.Response):Promise<void>{
         const param = Req.parsePostParam(req, {
             account: Req.ParseParamType.String,
@@ -72,54 +57,12 @@ export default class TaskController {
         const tId:string = this.CacheDbs.taskDb.generateTaskID(param.account);
         const bSuccess = await this.CacheDbs.taskDb.add(param.account,draf,tId);
         if(!bSuccess) return Response.error(res,Response.Status.DBError,"",400);
-        this.sendEmail(param.account,draf);
+        this.startEmailNotifyProcess(param.title, param.account);
         this.CacheDbs.cacheDb.add(param.account,draf,tId);
         return Response.success(res,{});
     }
 
-    private sendEmail(account:string, draf:TaskConfig.Draf){
-        // Load the AWS SDK for Node.js
-        // Create sendEmail params
-        const fromAddress = 'iamclaire.cheng@gmail.com';
-        const params = {
-            Destination: {
-                ToAddresses: [account]
-            },
-            Message: {
-                    Body: {
-                        Text: {
-                            Charset: "UTF-8",
-                            Data: `Your draf [${draf.title}] has been created`
-                        }
-                    },
-                    Subject: {
-                        Charset: 'UTF-8',
-                        Data: `Message from Task Manager`
-                    }
-                },
-            Source: fromAddress,
-            ReplyToAddresses: [ fromAddress ],
-        };
 
-        // Create the promise and SES service object
-        const sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
-
-        // Handle promise's fulfilled/rejected states
-        sendPromise.then(
-        (data)=> {
-            console.log(data.MessageId);
-        }).catch(
-            (err)=> {
-            console.error(err, err.stack);
-        });
-
-    }
-
-    /**
-     * [API EndPoint] conform Task
-     * @param req in
-     * @param res out
-     */
     public async conformTask(req:express.Request, res:express.Response):Promise<void>{
         const param = Req.parsePostParam(req, {
             account: Req.ParseParamType.String,
@@ -138,8 +81,30 @@ export default class TaskController {
         }
     }
 
+    private startEmailNotifyProcess(title:string, toAddress:string){
+        const config:NotifyConfig = {
+            title,
+            toAddress,
+            destroy: this.gcNotify
+        };
+        const notifyObj:AutoNotify = new AutoNotify(config);
+        this.notifyCacheQueue.push(notifyObj);
+     }
+
+     private gcNotify = (x:AutoNotify)=>{
+         console.log(`[gc] ${x}`);
+        const inx = this.notifyCacheQueue.indexOf(x);
+        let elem = this.notifyCacheQueue.exRemoveAt(inx);
+        console.log(`[gc] elem:${elem}  eq:${x === elem}`);
+        if(elem) elem = null;
+     }
 
 
+     public async testMaill(req:express.Request, res:express.Response):Promise<void>{
+        console.log("測試發送信件");
+        this.startEmailNotifyProcess("test1","iamclaire.cheng@gmail.com")
+        return Response.success(res,{});
+     }
 
 }
 

@@ -20,7 +20,7 @@ export default class AuthModel{
                 pw:hashedPassword,
                 joinT :Date.now().exToSec().toString()
             }
-            MongoInst.roloUsers.insertOne(user);
+            await MongoInst.roloUsers.insertOne(user);
             return Response.Status.Success;
         }catch(err){
             return Response.Status.FailureExecuting;
@@ -28,18 +28,25 @@ export default class AuthModel{
     }
 
     public static async isUserMath(account:string, pw:string):Promise<boolean>{
-        const member = await MongoInst.roloUsers.findOne({account});
-        if(!member) return false;
-        return await bcrypt.compare(pw,member.pw);
+        try{
+            const member = await MongoInst.roloUsers.findOne({account});
+            if(!member) return false;
+            return await bcrypt.compare(pw,member.pw);
+        }catch(err){
+            return false;
+        }
     }
 
 
     private static async validateRegist(account:string):Promise<Response.Status>{
-        if(this.validateEmail(account)){
-            const bExist = await this.isUserExist(account);
-            return bExist ? Response.Status.UserExisting : Response.Status.Success;
+        try{
+            if(this.validateEmail(account)){
+                const bExist = await this.isUserExist(account);
+                return bExist ? Response.Status.UserExisting : Response.Status.Success;
+            }
+        }catch(err){
+            return Response.Status.EmailError;
         }
-        return Response.Status.EmailError;
     }
 
     private static validateEmail(email:string) {

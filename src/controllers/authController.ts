@@ -8,32 +8,25 @@ import { Req } from '../modules/req';
 export default class AuthController{
 
 
-    public async register(req:express.Request, res:express.Response):Promise<void>{
+    public async register(req:express.Request, res:express.Response){
         const param = this.mappingAuthParam(req);
         if(!param) return Response.paramsError(res);
-        try{
-            const status = await AuthModel.registerUser(param.account,param.pw);
-            if(status === Response.Status.Success){
-                return Response.success(res, {});
-            }
-            return Response.error(res, status, "Register Failed", 400);
-        }catch(err){
-            console.log("ERRR")
+        const status = await AuthModel.registerUser(param.account,param.pw);
+        if(status === Response.Status.Success){
+            return Response.success(res, {});
         }
+        return Response.error(res, status, "Register Failed", 400);
     }
 
-    public async logIn(req:express.Request, res:express.Response):Promise<void>{
+    public async logIn(req:express.Request, res:express.Response){
         const param = this.mappingAuthParam(req);
         if(!param) return Response.paramsError(res);
-        try{
-            if(await AuthModel.isUserMath(param.account,param.pw)){
-                const token = LoginToken.generateToken(req.body.account);
-                return Response.success(res,{token});
-            }
-            return Response.error(res, Response.Status.Verify, "login Failed", 400);
-        }catch(err){
-            console.log("ERRR")
+        const bMatch = await AuthModel.isUserMath(param.account,param.pw);
+        if(bMatch){
+            const token = LoginToken.generateToken(req.body.account);
+            return Response.success(res,{token});
         }
+        return Response.error(res, Response.Status.Verify, "login Failed", 400);
     }
 
     private mappingAuthParam(req:express.Request){

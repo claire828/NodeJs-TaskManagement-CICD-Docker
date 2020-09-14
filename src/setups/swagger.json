@@ -1,0 +1,69 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Task Manager API",
+        "description": "Task API description"
+        
+    },
+    "tags": [
+        {
+            "name": "Auths",
+            "description": "API for in the system"
+        }
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/auth": {
+            "post": {
+                "tags": [
+                    "register"
+                ],
+                "summary": "Create a new User",
+                "requestBody": {
+                    "description": "User Object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/auth"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed. Bad post data."
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "auth": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "pw": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

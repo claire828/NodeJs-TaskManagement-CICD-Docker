@@ -8,7 +8,8 @@ import { Routers } from './routes/routers';
 import ServerSetup from './setups/serverSetup';
 import TedisInst from './instances/tedisInst';
 import MongoInst from './instances/mongoInst';
-
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './setups/swagger.json'
 
 export default class App{
 
@@ -32,6 +33,7 @@ export default class App{
   }
 
   private applyMiddlewares(){
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     this.app.use(Middleware.noCahce);
     this.app.use(BodyParse.json());
     this.app.use(BodyParse.urlencoded({extended:true}));

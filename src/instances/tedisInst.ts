@@ -5,28 +5,31 @@ import ServerSetup from '../setups/serverSetup';
 namespace TedisInst{
     let inst:Tedis;
 
-    export function init(){
+    export async function init(){
 
-        return new Promise((resolve, reject) => {
-            inst = new Tedis({
-                port:ServerSetup.redis.port,
+        try {
+            return new Promise((resolve, reject) => {
+                inst = new Tedis({
+                    port: ServerSetup.redis.port,
+                });
+                if (!inst) {
+                    return reject(`err: cannot create redis`);
+                }
+                inst.on("connect", () => {
+                    console.log(`⚡️[redis]: Server is running at ${ServerSetup.redis.host}:${ServerSetup.redis.port}`);
+                    resolve();
+                });
+                inst.on("error", (err) => {
+                    console.log(`err: ${err}`);
+                });
+                inst.on("close", () => {
+                    console.log(`Redis connection has closed`);
+                });
             });
-            if(!inst){
-                return reject(`err: cannot create redis`);
-            }
-            inst.on("connect",()=>{
-                console.log(`⚡️[redis]: Server is running at ${ServerSetup.redis.host}:${ServerSetup.redis.port}`);
-                resolve();
-            });
-            inst.on("error",(err)=>{
-                console.log(`err: ${err}`);
-            });
-            inst.on("close",()=>{
-                console.log(`Redis connection has closed`);
-            })
-        }).catch((err)=>{
-            console.log(`EEEERR:${err}`);
-        });
+        }
+        catch (error) {
+            console.log(`EEEERR:${error}`);
+        }
 
     }
 
