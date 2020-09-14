@@ -47,7 +47,7 @@ namespace Response{
     }
 
     export function verifyError(res: express.Response ): void {
-        error(res, Status.Verify, '', 401);
+        error(res, Status.Verify, '', 400);
     }
 }
 export default Response;

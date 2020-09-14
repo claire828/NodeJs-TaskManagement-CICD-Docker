@@ -71,6 +71,7 @@ export default class TaskController {
             tId: Req.ParseParamType.String,
         });
         if(!param) return Response.paramsError(res);
+        
         try{
             const task = await this.CacheDbs.taskDb.conform(param.account,param.tId);
             if(task){
