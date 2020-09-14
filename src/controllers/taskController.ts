@@ -65,17 +65,17 @@ export default class TaskController {
     }
 
 
-    public async conformTask(req:express.Request, res:express.Response):Promise<void>{
+    public async confirmTask(req:express.Request, res:express.Response):Promise<void>{
         const param = Req.parsePostParam(req, {
             account: Req.ParseParamType.String,
             tId: Req.ParseParamType.String,
         });
         if(!param) return Response.paramsError(res);
-        
+
         try{
-            const task = await this.CacheDbs.taskDb.conform(param.account,param.tId);
+            const task = await this.CacheDbs.taskDb.confirm(param.account,param.tId);
             if(task){
-                this.CacheDbs.cacheDb.conform(param.account,param.tId,task);
+                this.CacheDbs.cacheDb.confirm(param.account,param.tId,task);
                 return Response.success(res,{});
             }
             return Response.paramsError(res);

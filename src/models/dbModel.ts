@@ -3,7 +3,7 @@ import TedisInst from "../instances/tedisInst";
 import { Tedis } from "tedis";
 
 /**
- * Basic DB Model. 
+ * Basic DB Model.
  */
 export default abstract class DbModel{
 
@@ -12,7 +12,7 @@ export default abstract class DbModel{
 
     abstract async getAll(account:string):Promise<TaskConfig.Task[]>;
     abstract async add(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>;
-    abstract async conform(account:string, tId:string, task?:TaskConfig.Task ):Promise<TaskConfig.Task>;
+    abstract async confirm(account:string, tId:string, task?:TaskConfig.Task ):Promise<TaskConfig.Task>;
     public async saveAll(account:string, allTasks:TaskConfig.Task[]):Promise<void>{
         return;
     }

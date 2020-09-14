@@ -36,7 +36,7 @@ export default class CacheModel extends DbModel {
         return true;
     }
 
-    public async conform( account:string, tId:string, task:TaskConfig.Task ):Promise<TaskConfig.Task>{
+    public async confirm( account:string, tId:string, task:TaskConfig.Task ):Promise<TaskConfig.Task>{
         const cacheList = await this.retrieveTaskList(account)
         if(cacheList){
             const inx = cacheList.findIndex( x=> x.tId === tId);

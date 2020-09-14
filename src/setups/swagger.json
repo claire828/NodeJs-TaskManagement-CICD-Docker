@@ -27,7 +27,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Create a new User (sing up with email)",
+                "summary": "Create a new User (sign in with email)",
                 "requestBody": {
                     "description": "Auth Object <br> account:Email ",
                     "required": true,
@@ -118,19 +118,19 @@
                     }
                 }
             }
-        },"/task/conform": {
+        },"/task/confirm": {
             "post": {
                 "tags": [
                     "Task"
                 ],
-                "summary": "Conform Task",
+                "summary": "Confirm Task",
                 "requestBody": {
                     "description": "tId: task ID. You can see it through task/get API",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/definitions/conformTask"
+                                "$ref": "#/definitions/confirmTask"
                             }
                         }
                     }
@@ -142,7 +142,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/conformTask"
+                            "$ref": "#/definitions/confirmTask"
                         }
                     },
                     "400": {
@@ -221,7 +221,7 @@
                     "type": "string"
                 }
             }
-        },"conformTask": {
+        },"confirmTask": {
             "type": "object",
             "properties": {
                 "token": {

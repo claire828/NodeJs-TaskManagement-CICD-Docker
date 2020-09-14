@@ -3,7 +3,7 @@ namespace TaskConfig{
 
     export enum Status{
         Draf,
-        Conform
+        Confirm
     }
     export type Draf = {
         title:string,

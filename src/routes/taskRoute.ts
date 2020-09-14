@@ -22,9 +22,9 @@ export default class TaskRoute extends BasicToute{
              Middleware.verifyToken,
             this.taskController.getTasks.bind(this.taskController)
         );
-        this.router.post('/task/conform',
+        this.router.post('/task/confirm',
             Middleware.verifyToken,
-            this.taskController.conformTask.bind(this.taskController)
+            this.taskController.confirmTask.bind(this.taskController)
         );
     }
 

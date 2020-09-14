@@ -29,7 +29,7 @@ export default class TaskModel extends DbModel{
         }
     }
 
-    public async conform(account:string, tId:string , task?:TaskConfig.Task):Promise<TaskConfig.Task>{
+    public async confirm(account:string, tId:string , task?:TaskConfig.Task):Promise<TaskConfig.Task>{
         const value = await this.retrieveByKey(tId);
         if(!value) return null;
         await TedisInst.get().del(tId);
@@ -38,7 +38,7 @@ export default class TaskModel extends DbModel{
             title: draf.title,
             content: draf.content,
             tId,
-            status:TaskConfig.Status.Conform,
+            status:TaskConfig.Status.Confirm,
             t:{st:Date.now().exToSec().toString()}
         };
         await MongoInst.roloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
