@@ -92,18 +92,9 @@ export default class TaskController {
      }
 
      private gcNotify = (x:AutoNotify)=>{
-         console.log(`[gc] ${x}`);
         const inx = this.notifyCacheQueue.indexOf(x);
         let elem = this.notifyCacheQueue.exRemoveAt(inx);
-        console.log(`[gc] elem:${elem}  eq:${x === elem}`);
         if(elem) elem = null;
-     }
-
-
-     public async testMaill(req:express.Request, res:express.Response):Promise<void>{
-        console.log("測試發送信件");
-        this.startEmailNotifyProcess("test1","iamclaire.cheng@gmail.com")
-        return Response.success(res,{});
      }
 
 }

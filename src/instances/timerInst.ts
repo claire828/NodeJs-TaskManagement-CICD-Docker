@@ -1,6 +1,7 @@
 
-import { EventType } from "../events/baseEvent";
+import { EventType, EventHandle } from "../events/baseEvent";
 import TimerEvent from "../events/timerEvent";
+
 
 export default class TimerInst{
 
@@ -27,12 +28,12 @@ export default class TimerInst{
         this.event.emit(EventType.UpdateBySec,this.ts);
     }
 
-    public addListen(event: EventType.UpdateBySec, action: (ts:number) => void){
-        this.event.on(event, action);
+    public addListen(event: EventType.UpdateBySec, action: (ts:number) => void):EventHandle{
+        return this.event.on(event, action);
     }
 
-    public rmListent(event:EventType.UpdateBySec, action: (ts:number) => void){
-        this.event.rm(event,action);
+    public rmListent(eventHandle:EventHandle){
+        this.event.rm(eventHandle);
     }
 
 }

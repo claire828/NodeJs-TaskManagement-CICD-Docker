@@ -2,6 +2,7 @@ import TimerInst from "../../instances/timerInst"
 import { EventType } from "../../events/baseEvent";
 import _ from "underscore";
 import SimpleEmailService from "./simpleEmailService";
+import { EventHandle } from "../../events/baseEvent";
 
 
 export interface NotifyConfig{
@@ -15,6 +16,7 @@ export default class AutoNotify{
     private sesConfig:NotifyConfig;
     private isJobDone:boolean;
     private endTime:number = 0;
+    private eventHandler:EventHandle;
 
     constructor(info:NotifyConfig){
         this.sesConfig = info;
@@ -22,12 +24,11 @@ export default class AutoNotify{
     }
 
     private initial():void{
-        this.endTime = Date.now().exToSec() + _.random(5,6);
-        TimerInst.instance.addListen(EventType.UpdateBySec, this.update.bind(this));
+        this.endTime = Date.now().exToSec() + _.random(5,20);
+        this.eventHandler = TimerInst.instance.addListen(EventType.UpdateBySec, this.update.bind(this));
     }
 
     private update(time:number){
-        console.log(`[consume]update ts:${time} vs end:${this.endTime}`);
         if(this.isJobDone || this.endTime > time) return;
         this.exeJobFinish();
         this.sendEmailNotify();
@@ -35,7 +36,7 @@ export default class AutoNotify{
 
     private exeJobFinish(){
         this.isJobDone = true;
-        TimerInst.instance.rmListent(EventType.UpdateBySec,this.update.bind(this));
+        TimerInst.instance.rmListent(this.eventHandler);
     }
 
     private async sendEmailNotify(){
