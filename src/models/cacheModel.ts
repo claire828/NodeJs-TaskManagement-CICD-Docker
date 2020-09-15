@@ -22,14 +22,14 @@ export default class CacheModel extends DbModel {
         this.db.setex(account,this.ExpiredSec , JSON.stringify(allTasks));
     }
 
-    public async add(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>{
+    public async add(account:string, draft:TaskConfig.Draft, tId:string):Promise<boolean>{
         const cacheList = await this.retrieveTaskList(account)
         if(cacheList){
             cacheList.push({
-                title:draf.title,
-                content:draf.content,
+                title:draft.title,
+                content:draft.content,
                 tId,
-                status:TaskConfig.Status.Draf,
+                status:TaskConfig.Status.Draft,
             });
             this.saveAll(account,cacheList);
         }

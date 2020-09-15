@@ -7,8 +7,8 @@ import '../extensions/stringExtension';
 import DbModel from "./dbModel";
 
 /**
- * Redis DB - Cache Drafs Infomation.
- * Redis <Key, Value> = <TaskID, TaskInfomation(draf) >
+ * Redis DB - Cache Drafts Infomation.
+ * Redis <Key, Value> = <TaskID, TaskInfomation(draft) >
  */
 export default class TaskModel extends DbModel{
     readonly ExpiredSec = (24).exHoursInSec();
@@ -17,11 +17,11 @@ export default class TaskModel extends DbModel{
         return await this.retrieveFromServer(account);
     }
 
-    public async add(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>{
+    public async add(account:string, draft:TaskConfig.Draft, tId:string):Promise<boolean>{
         try{
             await Promise.all([
-                TedisInst.get().setex(tId, this.ExpiredSec, JSON.stringify(draf)),
-                MongoInst.roloTasks.updateOne({account},{$addToSet:{drafs:tId}},{upsert:true})
+                TedisInst.get().setex(tId, this.ExpiredSec, JSON.stringify(draft)),
+                MongoInst.roloTasks.updateOne({account},{$addToSet:{drafts:tId}},{upsert:true})
             ]);
             return true;
         }catch(err){
@@ -33,31 +33,31 @@ export default class TaskModel extends DbModel{
         const value = await this.retrieveByKey(tId);
         if(!value) return null;
         await TedisInst.get().del(tId);
-        const draf = value.exToObj() as TaskConfig.Draf;
+        const draft = value.exToObj() as TaskConfig.Draft;
         task = {
-            title: draf.title,
-            content: draf.content,
+            title: draft.title,
+            content: draft.content,
             tId,
             status:TaskConfig.Status.Confirm,
             t:{st:Date.now().exToSec().toString()}
         };
-        await MongoInst.roloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafs:tId}},{upsert:true});
+        await MongoInst.roloTasks.updateOne({account},{$addToSet:{tasks:task},$pull:{drafts:tId}},{upsert:true});
         return task;
     }
 
     private async retrieveFromServer(account:string):Promise<TaskConfig.Task[]>{
         const target = await MongoInst.roloTasks.findOne({account});
         const list = target.tasks ?? [];
-        for (const tId of target.drafs){
+        for (const tId of target.drafts){
             const task = await this.retrieveByKey(tId);
             if(!task) continue;
 
-            const draf = task.exToObj() as TaskConfig.Draf;
+            const draft = task.exToObj() as TaskConfig.Draft;
             list.push({
-                title:draf.title,
-                content:draf.content,
+                title:draft.title,
+                content:draft.content,
                 tId,
-                status:TaskConfig.Status.Draf,
+                status:TaskConfig.Status.Draft,
             });
         }
         return list;

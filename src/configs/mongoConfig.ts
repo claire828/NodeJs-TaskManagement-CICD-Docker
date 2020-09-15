@@ -26,7 +26,7 @@ namespace MongoConfig {
 
        export type TaskCollect = {
             account:string,
-            drafs:string[],
+            drafts:string[],
             tasks:TaskConfig.Task[],
        }
     }

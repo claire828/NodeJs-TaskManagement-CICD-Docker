@@ -2,15 +2,15 @@
 namespace TaskConfig{
 
     export enum Status{
-        Draf,
+        Draft,
         Confirm
     }
-    export type Draf = {
+    export type Draft = {
         title:string,
         content:string,
     }
 
-    export type Task = Draf & {
+    export type Task = Draft & {
         tId:string,
         status:Status,
         t?:Time,

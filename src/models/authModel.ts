@@ -12,6 +12,8 @@ export default class AuthModel{
 
     public static async registerUser(account:string, pw:string):Promise<Response.Status>{
         const validationStatus = await this.validateRegist(account);
+
+        console.log(`validationStatus:${validationStatus}`)
         if(validationStatus!== Response.Status.Success) return validationStatus;
         try{
             const hashedPassword = await bcrypt.hash(pw, LoginToken.SaltRounds)
@@ -42,9 +44,8 @@ export default class AuthModel{
     private static async validateRegist(account:string):Promise<Response.Status>{
         try{
             if(this.validateEmail(account)){
-                await this.isUserExist(account).then(exist=>{
-                    return exist ? Response.Status.UserExisting : Response.Status.Success;
-                });
+                const exist = await this.isUserExist(account);
+                return exist ? Response.Status.UserExisting : Response.Status.Success;
             }
             return Response.Status.EmailError;
         }catch(err){

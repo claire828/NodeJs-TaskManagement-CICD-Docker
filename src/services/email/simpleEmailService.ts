@@ -14,7 +14,7 @@ export default async (account:string, title:string)=>{
                 Body: {
                     Text: {
                         Charset: "UTF-8",
-                        Data: `Your draf [${title}] has been created`
+                        Data: `Your draft [${title}] has been created`
                     }
                 },
                 Subject: {

@@ -10,7 +10,7 @@ export default class AuthController{
 
     public async register(req:express.Request, res:express.Response){
         const param = this.mappingAuthParam(req);
-        if(!param) return Response.paramsError(res);
+        if(!param || _.isEmpty(param.pw)) return Response.paramsError(res);
 
         const status = await AuthModel.registerUser(param.account,param.pw);
         if(status === Response.Status.Success){

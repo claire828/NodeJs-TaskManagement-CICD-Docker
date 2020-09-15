@@ -28,11 +28,11 @@ export default class TimerInst{
         this.event.emit(EventType.UpdateBySec,this.ts);
     }
 
-    public addListen(event: EventType.UpdateBySec, action: (ts:number) => void):EventHandle{
+    public subscribe(event: EventType.UpdateBySec, action: (ts:number) => void):EventHandle{
         return this.event.on(event, action);
     }
 
-    public rmListen(eventHandle:EventHandle){
+    public unsubscribe(eventHandle:EventHandle){
         this.event.rm(eventHandle);
     }
 

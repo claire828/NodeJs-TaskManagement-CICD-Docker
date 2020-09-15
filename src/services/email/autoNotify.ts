@@ -25,7 +25,7 @@ export default class AutoNotify{
 
     private initial():void{
         this.endTime = Date.now().exToSec() + _.random(5,20);
-        this.eventHandler = TimerInst.instance.addListen(EventType.UpdateBySec, this.update.bind(this));
+        this.eventHandler = TimerInst.instance.subscribe(EventType.UpdateBySec, this.update.bind(this));
     }
 
     private update(time:number){
@@ -37,7 +37,7 @@ export default class AutoNotify{
 
     private exeJobFinish(){
         this.isJobDone = true;
-        TimerInst.instance.rmListen(this.eventHandler);
+        TimerInst.instance.unsubscribe(this.eventHandler);
     }
 
     private async sendEmailNotify(){

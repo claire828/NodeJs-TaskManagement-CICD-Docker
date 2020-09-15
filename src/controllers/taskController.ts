@@ -50,15 +50,15 @@ export default class TaskController {
         });
         if(!param) return Response.paramsError(res);
 
-        const draf:TaskConfig.Draf = {
+        const draft:TaskConfig.Draft = {
             title: param.title,
             content: param.content
         }
         const tId:string = this.CacheDbs.taskDb.generateTaskID(param.account);
-        const bSuccess = await this.CacheDbs.taskDb.add(param.account,draf,tId);
+        const bSuccess = await this.CacheDbs.taskDb.add(param.account,draft,tId);
         if(bSuccess){
             this.startEmailNotifyProcess(param.title, param.account);
-            this.CacheDbs.cacheDb.add(param.account,draf,tId);
+            this.CacheDbs.cacheDb.add(param.account,draft,tId);
             return Response.success(res,{});
         }
         return Response.error(res,Response.Status.DBError,"",400);

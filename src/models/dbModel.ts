@@ -11,7 +11,7 @@ export default abstract class DbModel{
     protected abstract readonly ExpiredSec:number;
 
     abstract async getAll(account:string):Promise<TaskConfig.Task[]>;
-    abstract async add(account:string, draf:TaskConfig.Draf, tId:string):Promise<boolean>;
+    abstract async add(account:string, draft:TaskConfig.Draft, tId:string):Promise<boolean>;
     abstract async confirm(account:string, tId:string, task?:TaskConfig.Task ):Promise<TaskConfig.Task>;
     public async saveAll(account:string, allTasks:TaskConfig.Task[]):Promise<void>{
         return;
